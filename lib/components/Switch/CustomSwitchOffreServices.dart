@@ -163,7 +163,7 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
                 date: demand.addedDate.toString() ?? '',
                 evalue: true,
                 budget: demand.budget,
-                location: "Medenine ya 7aaaaaaj",
+                location: "Non selectionnée",
                 ownerName: demand.ownerName ?? '',  // Now using the pre-fetched user name
                 statut: demand.status == DemandStatus.open,
                 onProposerOffrePressed: () {

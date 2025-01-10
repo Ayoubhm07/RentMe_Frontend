@@ -8,7 +8,7 @@ import 'SharedPrefService.dart';
 
 class UserService {
   final String apiUrl =
-      'http://localhost:8080/auth'; // L'URL de votre API Gateway
+      'http://localhost:8080/auth';
   JWTService jwtService = JWTService();
   SharedPrefService sharedPrefService = SharedPrefService();
 
@@ -59,7 +59,7 @@ class UserService {
       String token = await sharedPrefService.readUserData('accessToken');
       String username = jwtService.getUsernameFromToken(token)['sub'];
       var response = await http.get(
-        Uri.parse('$apiUrl/open/getAllUserByUsername/$username'),
+        Uri.parse('$apiUrl/getUserByEmail/$username'),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {

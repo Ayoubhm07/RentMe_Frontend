@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart'; // For date formatting
-
+import 'package:intl/intl.dart';
 class DemandAcceptedOfferCard extends StatelessWidget {
   final String userName;
   final String userImage;
@@ -21,88 +20,81 @@ class DemandAcceptedOfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.green[50],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            spreadRadius: 2,
+            spreadRadius: 0,
             blurRadius: 6,
             offset: Offset(0, 2),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               CircleAvatar(
                 backgroundImage: NetworkImage(userImage),
-                radius: 30,
+                radius: 25, // Reduced size
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 8), // Reduced spacing
               Expanded(
                 child: Text(
                   userName,
                   style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.black,
+                    color: Colors.black87,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 8), // Reduced spacing
           TextWithIcon(
             icon: Icons.calendar_today,
             text: 'Accepté le: ${DateFormat('dd MMM yyyy').format(acceptedAt)}',
             iconColor: Colors.blue,
-            textColor: Colors.black,
+            textColor: Colors.black87,
           ),
           TextWithIcon(
             icon: Icons.hourglass_bottom,
             text: 'Durée: $duration',
             iconColor: Colors.blue,
-            textColor: Colors.black,
+            textColor: Colors.black87,
           ),
           TextWithIcon(
             icon: Icons.euro,
             text: 'Prix: €$price',
             iconColor: Colors.green,
-            textColor: Colors.black,
+            textColor: Colors.black87,
           ),
           SizedBox(height: 10),
-          Text(
-            "Status: Offre Acceptée",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-              color: Colors.green,
-            ),
-          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ActionButton(
                 title: 'Chat',
                 icon: Icons.chat,
-                color: Colors.green,
+                color: Colors.green[300]!,
                 onPressed: () {
-                  // Chat functionality
+                  // Implement chat functionality
                 },
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 8), // Reduced spacing
               ActionButton(
                 title: 'Payer',
                 icon: Icons.payment,
-                color: Colors.blue,
+                color: Colors.blue[300]!,
                 onPressed: () {
-                  // Payment functionality
+                  // Implement payment functionality
                 },
               ),
             ],
@@ -129,23 +121,23 @@ class TextWithIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: iconColor, size: 24),
-        SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 14,
-            color: textColor,
-            fontWeight: FontWeight.normal,
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: iconColor, size: 20),
+          SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: textColor,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-
-
 }
 
 class ActionButton extends StatelessWidget {
@@ -171,7 +163,7 @@ class ActionButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),

@@ -299,7 +299,6 @@ class _RentalItemCardMyDemandState extends State<RentalItemCardMyDemand> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Section
               ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
                 child: Image.asset(

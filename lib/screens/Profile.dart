@@ -274,7 +274,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             ? 'Amateur Certifié'
                                             : user!.roles == 'professionel'
                                                 ? 'Professionnel'
-                                                : user!.roles == 'expert'
+                                                : user!.roles == 'EXPERT'
                                                     ? 'Expert'
                                                     : 'Client',
                                     style: GoogleFonts.getFont(

@@ -80,7 +80,7 @@ class RentalItemMyDemandDetails extends StatelessWidget {
       backgroundColor: AppTheme.primaryColor,
       appBar: CustomAppBar(
         notificationIcon: Icon(Icons.notifications, color: Colors.white),
-        title: 'Offre de Services',
+        title: 'Espace Demandes',
         showSearchBar: false,
         backgroundColor: AppTheme.primaryColor,
       ),
@@ -88,17 +88,38 @@ class RentalItemMyDemandDetails extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 16.0), // Adds spacing between AppBar and Text
-            Center(
-              child: Text(
-                "Détails",
-                style: GoogleFonts.roboto(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white
+          Center(
+            child: Container(
+              width: double.infinity, // Assure that the container fills the horizontal space
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w), // Vertical and horizontal padding
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Colors.deepPurple[300]!, Colors.deepPurple[700]!], // Gradient effect from lighter to darker purple
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: Offset(0, 2), // Shadow positioned below the container
+                  ),
+                ],
+              ),
+              child: Text(
+                "Détails de la Demande",
+                style: GoogleFonts.roboto(
+                  fontSize: 20.sp, // Font size for emphasis
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Text color for contrast against the gradient
+                ),
+                textAlign: TextAlign.center, // Centers the text horizontally in the container
               ),
             ),
-            SizedBox(height: 10.0),
+
+          ),
+
+          SizedBox(height: 10.0),
             Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -321,7 +342,6 @@ class RentalItemMyDemandDetails extends StatelessWidget {
                   );
 
                   if (acceptedOffer != null) {
-                    // Use nested FutureBuilder to fetch user details
                     return FutureBuilder<User>(
                       future: userService.findUserById(acceptedOffer.userId),
                       builder: (context, userSnapshot) {
