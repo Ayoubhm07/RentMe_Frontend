@@ -233,6 +233,7 @@ class _MyDemandOffersSectionState extends State<MyDemandOffersSection> {
   }
 
   void _showRejectDialog(BuildContext context, Offre offre) {
+    OffreService offreService = OffreService();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -248,10 +249,11 @@ class _MyDemandOffersSectionState extends State<MyDemandOffersSection> {
             ),
             TextButton(
               child: Text('Yes'),
-              onPressed: () {
-                // Add logic to reject the offer
+              onPressed: () async {
+                await offreService.deleteOffer(offre.id??0);
                 Navigator.of(context). pop();
-              },
+                Navigator.of(context).pop();
+                },
             ),
           ],
         );

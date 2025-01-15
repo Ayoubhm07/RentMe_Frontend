@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_screenutil: ^5.9.3
+  flutter_stripe: ^11.3.0
   dots_indicator: ^3.0.0
   google_fonts: ^6.2.1
   country_picker: ^2.0.26
@@ -58,9 +59,12 @@ dependencies:
   zego_express_engine: ^3.6.1
   firebase_core: ^2.4.1
   firebase_auth: ^4.2.4
+  firebase_messaging: ^14.0.3
+  firebase_analytics: ^10.10.7
   cloud_firestore: ^4.3.1
   zego_uikit_prebuilt_call: ^4.16.8
   zego_uikit_signaling_plugin: ^2.8.5
+  flutter_local_notifications: ^18.0.1
 
 
 

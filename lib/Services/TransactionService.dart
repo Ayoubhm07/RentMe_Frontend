@@ -1,22 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../entities/Transaction.dart';
 import '../entities/TransactionDTO.dart';
 import 'SharedPrefService.dart';
 
 class TransactionService {
   final String _baseUrl = 'http://localhost:8080/transaction';
-  final http.Client httpClient;
-  final SharedPrefService sharedPrefService;
-
-  TransactionService({required this.httpClient, required this.sharedPrefService});
+  SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<String> getOnboardingLink(String accountId) async {
     final url = Uri.parse('$_baseUrl/onboarding-link/$accountId');
+    String accessToken = await sharedPrefService.readUserData('accessToken');
     try {
-      final response = await httpClient.get(url, headers: {
+      final response = await http.get(url, headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${await sharedPrefService.readUserData('accessToken')}',
+        'Authorization': 'Bearer $accessToken',
       });
       if (response.statusCode == 200) {
         return response.body;
@@ -30,11 +27,13 @@ class TransactionService {
 
   Future<String> buyTokens(TransactionDTO transaction) async {
     final url = Uri.parse('$_baseUrl/buy-tokens');
+    String accessToken = await sharedPrefService.readUserData('accessToken');
     try {
-      final response = await httpClient.post(url,
+      print(accessToken);
+      final response = await http.post(url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${await sharedPrefService.readUserData('accessToken')}',
+          'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(transaction.toJson()),
       );
@@ -50,30 +49,29 @@ class TransactionService {
 
   Future<String> pay(int idClient, int idWorker, int tokens) async {
     final url = Uri.parse('$_baseUrl/pay/$idClient/$idWorker/$tokens');
-    try {
-      final response = await httpClient.put(url,
+    String accessToken = await sharedPrefService.readUserData('accessToken');
+
+      final response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${await sharedPrefService.readUserData('accessToken')}',
+          'Authorization': 'Bearer $accessToken',
         },
       );
       if (response.statusCode == 200) {
-        return "Payment successful. Transfer ID: ${json.decode(response.body)['id']}";
-      } else {
-        throw Exception('Failed to make payment: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      throw Exception('Error making payment: $e');
-    }
+        return "Payment successful!-";
+      } else return "";
+
   }
 
   Future<String> workerPayout(int userId, int tokens) async {
     final url = Uri.parse('$_baseUrl/worker-payout/$userId/$tokens');
+    String accessToken = await sharedPrefService.readUserData('accessToken');
+
     try {
-      final response = await httpClient.post(url,
+      final response = await http.post(url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${await sharedPrefService.readUserData('accessToken')}',
+          'Authorization': 'Bearer $accessToken',
         },
       );
       if (response.statusCode == 200) {

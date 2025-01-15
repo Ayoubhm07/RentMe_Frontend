@@ -32,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
     bool isfinished = false;
-    // Call the user service to authenticate the user
     bool isAuthenticated = await us.authenticate(email, password);
     if (isAuthenticated) {
        isfinished = await us.getCurrentUserByUsername();

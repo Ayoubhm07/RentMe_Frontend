@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'Profile.dart';
+
 class EchecTokenScreen extends StatefulWidget {
   @override
   State<EchecTokenScreen> createState() => _EchecTokenScreenState();
 }
 
 class _EchecTokenScreenState extends State<EchecTokenScreen> {
-  int currentStep = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +87,10 @@ class _EchecTokenScreenState extends State<EchecTokenScreen> {
                       width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
                       child: ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            currentStep++;
-                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProfilePage()), // Replace 'ProfilePage' with your actual profile page widget
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 12),
@@ -100,7 +102,7 @@ class _EchecTokenScreenState extends State<EchecTokenScreen> {
                         child: Text(
                           'Continuer',
                           style: TextStyle(
-                            fontSize: 16, // Adjust this to your preferred size
+                            fontSize: 16,
                             color: Colors.white,
                           ),
                         ),

@@ -31,11 +31,11 @@ class OfferDetailsCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.r),
       ),
-      color: Colors.green[300], // Light green background color
+      color: Colors.green[300],
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Minimizes the height of the card
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -56,7 +56,6 @@ class OfferDetailsCard extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Implement the logic for contacting the owner
                   },
                   icon: Icon(Icons.chat, color: Colors.green[800]),
                   label: Text('Contacter le client'),

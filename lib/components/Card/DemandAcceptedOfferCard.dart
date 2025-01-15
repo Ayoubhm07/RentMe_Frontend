@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-class DemandAcceptedOfferCard extends StatelessWidget {
+
+import 'PaymentConfirmation.dart';
+
+class DemandAcceptedOfferCard extends StatefulWidget {
+  final int benifId;
   final String userName;
   final String userImage;
   final DateTime acceptedAt;
   final String duration;
   final int price;
-
+  final int demandId;
   const DemandAcceptedOfferCard({
     Key? key,
+    required this.benifId,
+    required this.demandId,
     required this.userName,
     required this.userImage,
     required this.acceptedAt,
@@ -18,16 +24,25 @@ class DemandAcceptedOfferCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _DemandAcceptedOfferCardState createState() => _DemandAcceptedOfferCardState();
+}
+
+class _DemandAcceptedOfferCardState extends State<DemandAcceptedOfferCard> {
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green[50],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.black87, Colors.grey[850]!], // Dark gradient
+        ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black54,
             spreadRadius: 0,
             blurRadius: 6,
             offset: Offset(0, 2),
@@ -38,89 +53,67 @@ class DemandAcceptedOfferCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Center(
+            child: Text(
+              "OFFRE ACCEPTÉE",
+              style: GoogleFonts.roboto(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                foreground: Paint()..shader = LinearGradient(
+                  colors: [Colors.green, Colors.green],
+                ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
           Row(
             children: [
               CircleAvatar(
-                backgroundImage: NetworkImage(userImage),
-                radius: 25, // Reduced size
+                backgroundImage: NetworkImage(widget.userImage),
+                radius: 25,
               ),
-              SizedBox(width: 8), // Reduced spacing
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  userName,
+                  widget.userName,
                   style: GoogleFonts.roboto(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: Colors.white,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8), // Reduced spacing
-          TextWithIcon(
-            icon: Icons.calendar_today,
-            text: 'Accepté le: ${DateFormat('dd MMM yyyy').format(acceptedAt)}',
-            iconColor: Colors.blue,
-            textColor: Colors.black87,
-          ),
-          TextWithIcon(
-            icon: Icons.hourglass_bottom,
-            text: 'Durée: $duration',
-            iconColor: Colors.blue,
-            textColor: Colors.black87,
-          ),
-          TextWithIcon(
-            icon: Icons.euro,
-            text: 'Prix: €$price',
-            iconColor: Colors.green,
-            textColor: Colors.black87,
-          ),
+          SizedBox(height: 8),
+          _buildTextWithIcon(Icons.calendar_today, 'Accepté le: ${DateFormat('dd MMM yyyy').format(widget.acceptedAt)}', Colors.lightGreen),
+          _buildTextWithIcon(Icons.hourglass_bottom, 'Durée: ${widget.duration}', Colors.cyan),
+          _buildTextWithIcon(Icons.euro_symbol, 'Prix: €${widget.price}', Colors.lightGreen),
           SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ActionButton(
-                title: 'Chat',
-                icon: Icons.chat,
-                color: Colors.green[300]!,
-                onPressed: () {
-                  // Implement chat functionality
-                },
-              ),
-              SizedBox(width: 8), // Reduced spacing
-              ActionButton(
-                title: 'Payer',
-                icon: Icons.payment,
-                color: Colors.blue[300]!,
-                onPressed: () {
-                  // Implement payment functionality
-                },
-              ),
+              _buildActionButton('Chat', Icons.chat, Colors.green[700]!, () {
+                print('Chat button pressed');
+              }),
+              _buildActionButton('Payer', Icons.payment, Colors.blue[800]!, () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (BuildContext context) {
+                    return ConfirmPaymentWidget(benifId: widget.benifId, amount: widget.price, userName: widget.userName, demandId: widget.demandId,);
+                  },
+                );
+              }),
             ],
           ),
         ],
       ),
     );
   }
-}
 
-class TextWithIcon extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color iconColor;
-  final Color textColor;
-
-  const TextWithIcon({
-    Key? key,
-    required this.icon,
-    required this.text,
-    this.iconColor = Colors.blue,
-    this.textColor = Colors.black,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTextWithIcon(IconData icon, String text, Color iconColor) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Row(
@@ -131,31 +124,15 @@ class TextWithIcon extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 14,
-              color: textColor,
+              color: Colors.white,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class ActionButton extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const ActionButton({
-    Key? key,
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onPressed,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildActionButton(String title, IconData icon, Color color, VoidCallback onPressed) {
     return ElevatedButton.icon(
       icon: Icon(icon, color: Colors.white),
       label: Text(title, style: TextStyle(color: Colors.white)),

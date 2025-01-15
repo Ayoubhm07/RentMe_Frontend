@@ -10,10 +10,19 @@ class Demand {
   DemandStatus status;
   DateTime addedDate;
   int userId;
+  String? phoneNumber;
+  String? userEmail;
+  String? userImage;
+
+
+
 
 
   Demand({
     this.id,
+    this.phoneNumber,
+    this.userImage,
+    this.userEmail,
     required this.domain,
     required this.title,
     required this.description,
@@ -29,6 +38,9 @@ class Demand {
   factory Demand.fromJson(Map<String, dynamic> json) {
     return Demand(
       id: json['id'],
+      userImage: json['userImage'],
+      userEmail: json['userEmail'],
+      phoneNumber: json['phoneNumber'],
       title: json['title'],
       ownerName: json['ownerName'],
       domain: json['domain'],
@@ -45,6 +57,9 @@ class Demand {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userImage' : userImage,
+      'phoneNumber' : phoneNumber,
+      'userEmail' : userEmail,
       'title': title,
       'domain': domain,
       'description': description,

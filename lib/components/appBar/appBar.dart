@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../screens/MainPages/notification.dart';
+import '../../screens/MainPages/NotificationSpace.dart';
 import '../../theme/AppTheme.dart';
 import '../Switch/CustomSwitchRechereche.dart'; // Assuming this is your custom widget
 
@@ -163,7 +163,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   buttonLabels: ['Profile', 'Location'],
                 ),
                 SizedBox(height: 20.h),
-                RechercheBtn(), // Assuming this is your custom search button widget
                 SizedBox(height: 16.h),
               ],
             ),

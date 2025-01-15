@@ -162,7 +162,6 @@ class CustomAppBard extends StatelessWidget implements PreferredSizeWidget {
                   buttonLabels: ['Profile', 'Location'],
                 ),
                 SizedBox(height: 20.h),
-                RechercheBtn(), // Assuming this is your custom search button widget
                 SizedBox(height: 16.h),
               ],
             ),

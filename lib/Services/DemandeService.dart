@@ -70,7 +70,6 @@ class DemandeService {
           'Authorization': 'Bearer $accessToken',
         },
       );
-
       if (response.statusCode == 200) {
         print('Demandes récupérées avec succès');
         print(response.body);
@@ -140,6 +139,71 @@ class DemandeService {
     } catch (e) {
       print('Erreur de connexion: $e');
       throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+  Future<Demand> updateDemandPrice(int id, double price) async {
+    String accessToken = await sharedPrefService.readUserData('accessToken');
+    try {
+      final response = await http.patch(
+        Uri.parse('$url/$id/$price'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Prix de la demande mis à jour avec succès');
+        return Demand.fromJson(json.decode(response.body));
+      } else {
+        throw Exception(
+            'Échec de la mise à jour du prix de la demande: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+
+  Future<Demand> updateDemandStatus(int id) async {
+    String accessToken = await sharedPrefService.readUserData('accessToken');
+    try {
+      final response = await http.patch(
+        Uri.parse('$url/$id/status'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Prix de la demande mis à jour avec succès');
+        return Demand.fromJson(json.decode(response.body));
+      } else {
+        throw Exception(
+            'Échec de la mise à jour du status de la demande: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+  Future<List<Demand>> getDemandsByNotUserId(int userId) async {
+    String accessToken = await sharedPrefService.readUserData('accessToken');
+    final response = await http.get(
+      Uri.parse('$url/not-user/$userId'),
+      headers: {
+        'Authorization': 'Bearer $accessToken'
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Demand.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to fetch demands: ${response.reasonPhrase}');
     }
   }
 

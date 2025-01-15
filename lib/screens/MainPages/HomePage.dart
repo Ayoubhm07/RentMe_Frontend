@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,6 +7,7 @@ import 'package:khedma/Services/MinIOService.dart';
 import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/components/navbara.dart';
+import '../../Services/NotificationService.dart';
 import '../../components/appBar/appBar.dart';
 import '../../entities/ProfileDetails.dart';
 import '../../entities/User.dart';
@@ -24,8 +27,41 @@ class _HomeScreenState extends State<HomeScreen> {
   SharedPrefService sharedPrefService = SharedPrefService();
   ProfileService profileService = ProfileService();
   MinIOService minIOService = MinIOService();
+  NotificationService notificationService = NotificationService();
    User? currentUser;
    ProfileDetails? profileDetails;
+  Future<void> SaveFcmToken() async
+  {
+    User user = await sharedPrefService.getUser();
+    String token = await getToken();
+    user.fcmToken = token ;
+    await sharedPrefService.saveUser(user);
+    print("FIREBASEEEEEE TOKKEENNN $token");
+    await notificationService.saveDeviceToken(user.id ?? 0, token);
+
+  }
+  void requestNotificationPermissions() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+    }
+  }
+   
   Future<void> getCurrentUser() async
   {
     User user = await sharedPrefService.getUser();
@@ -57,8 +93,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    requestNotificationPermissions();
+    FirebaseMessaging.instance.requestPermission();
     getCurrentUser();
+    SaveFcmToken();
+
   }
+
+  Future<String> getToken()async{
+    String? token = await FirebaseMessaging.instance.getToken();
+    print(token);
+    return token ?? '';
+  }
+
   final List<Metier> metierList = [
     Metier('assets/images/img_6.png', 'Design Graphique', 4.9, 'A distance',
         'Expert', 'Nourhene Bakalti', true),

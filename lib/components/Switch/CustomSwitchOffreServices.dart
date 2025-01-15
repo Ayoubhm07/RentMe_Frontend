@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:khedma/Services/JWTService.dart';
+import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/Services/UserService.dart';
 import 'package:khedma/components/Card/RentalCardMyDemand.dart';
 import 'package:khedma/entities/Demand.dart';
 import 'package:khedma/entities/User.dart';
 import '../../Services/DemandeService.dart';
+import '../../entities/ProfileDetails.dart';
 import '../Card/RentalCardDisponibleOffre.dart';
 
 class CustomSwitchOffreServices extends StatefulWidget {
@@ -22,7 +24,12 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
   List<bool> isSelected = [true, false];
   DemandeService demandeService = DemandeService();
   UserService userService = UserService();
+  ProfileService profileService = ProfileService();
   SharedPrefService sharedPrefService = SharedPrefService();
+  ProfileDetails? profileDetails;
+  ProfileDetails? profileDetails2;
+  User? user;
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +105,18 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
   }
 
   Future<List<Demand>> getAllDemandsWithUser() async {
-    var demands = await demandeService.getAllDemands();
+    User user1 = await sharedPrefService.getUser();
+    int userId = user1.id ?? 0;
+    var demands = await demandeService.getDemandsByNotUserId(userId);
+     
     for (var demand in demands) {
       var user = await userService.findUserById(demand.userId);
+      profileDetails2 = await profileService.getProfileDetails(user.id ?? 0);
+      demand.userImage = profileDetails2?.profilePicture;
       demand.ownerName = user.userName;
+      demand.phoneNumber = user.numTel;
+      demand.userEmail = user.email ;
+      demand.location = profileDetails2!.ville!+","+profileDetails2!.rue!+","+profileDetails2!.codePostal!+","+profileDetails2!.pays!;
     }
     return demands;
   }
@@ -126,15 +141,13 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
                 date: demand.addedDate.toString() ?? '',
                 evalue: true,
                 budget: demand.budget,
-                location: "Medenine, Trig Gabes, 4100",
-                ownerName: demand.ownerName ?? '',  // Now using the pre-fetched user name
-                statut: demand.status == DemandStatus.open,
-                onProposerOffrePressed: () {
-                  // Action for offering
-                },
-                onRentPressed: () {
-                  // Action for renting
-                },
+                description: demand.description,
+                location: demand.location,
+                ownerName: demand.ownerName ?? '',
+                phoneNumber : demand.phoneNumber ?? "",
+                userEmail : demand.userEmail ?? "",
+                userImage : demand.userImage ?? "",
+                statut: demand.status.toString().split('.').last,
               );
             },
           );
@@ -158,20 +171,17 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
               Demand demand = snapshot.data![index];
               return RentalItemCardMyDemand(
                 demandId: demand.id ?? 0,
+                description: demand.description,
                 imageUrl: 'assets/images/menage.jpeg',
                 title: demand.title ?? '',
                 date: demand.addedDate.toString() ?? '',
                 evalue: true,
                 budget: demand.budget,
-                location: "Non selectionnée",
-                ownerName: demand.ownerName ?? '',  // Now using the pre-fetched user name
-                statut: demand.status == DemandStatus.open,
-                onProposerOffrePressed: () {
-                  // Action for offering
-                },
-                onRentPressed: () {
-                  // Action for renting
-                },
+                location: "*",
+                ownerName: demand.ownerName ?? '',
+                userImage: profileDetails!.profilePicture!,
+                statut: demand.status.toString().split('.').last,
+
               );
             },
           );
@@ -181,10 +191,11 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
   }
 
   Future<List<Demand>> fetchUserDemands() async {
-    User user = await sharedPrefService.getUser();
-    int userId= user.id ?? 0;
-    print(user.id);
-    print(user.userName);
+    user = await sharedPrefService.getUser();
+    profileDetails = await sharedPrefService.getProfileDetails();
+    int userId= user?.id ?? 0;
+    print(user?.id);
+    print(user?.userName);
     return demandeService.getDemandsByUserId(userId);
   }
 }

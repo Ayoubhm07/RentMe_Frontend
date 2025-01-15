@@ -1,11 +1,11 @@
 import 'dart:ffi';
 
 class TransactionDTO {
-   Long? userId;
+   int? userId;
    int amount;
    int tokens;
    String paymentIntentId;
-   String status;
+   String? status;
    String details;
 
   TransactionDTO({
@@ -13,7 +13,7 @@ class TransactionDTO {
     required this.amount,
     required this.tokens,
     required this.paymentIntentId,
-    required this.status,
+    this.status,
     required this.details,
   });
 

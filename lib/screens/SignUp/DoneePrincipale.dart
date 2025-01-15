@@ -328,10 +328,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Image.asset(
                     iconPath,
                     width: 24.w,  // Ajuste la largeur de l'image
-                    height: 24.h,  // Ajuste la hauteur de l'image
+                    height: 24.h,
                   ),
                 ),
-                SizedBox(width: 8.w),  // Réduit l'espace entre l'image et le texte
+                SizedBox(width: 8.w),
                 Text(
                   label,
                   style: TextStyle(

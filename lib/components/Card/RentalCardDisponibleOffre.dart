@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,24 +16,29 @@ class RentalItemCardDisponibleOffre extends StatefulWidget {
   final double budget;
   final String location;
   final String ownerName;
-  final bool statut;
-  final VoidCallback onProposerOffrePressed;
-  final VoidCallback onRentPressed;
+  final String statut;
+  final String description;
+  final String userEmail;
+  final String phoneNumber;
+  final String userImage;
+
 
 
   const RentalItemCardDisponibleOffre({
     Key? key,
     required this.demandId,
+    required this.userEmail,
+    required this.userImage,
+    required this.phoneNumber,
     required this.imageUrl,
+    required this.description,
     required this.title,
     required this.location,
     required this.ownerName,
-    required this.onProposerOffrePressed,
     required this.date,
     required this.evalue,
     required this.budget,
     required this.statut,
-    required this.onRentPressed,
   }) : super(key: key);
 
   @override
@@ -40,230 +47,14 @@ class RentalItemCardDisponibleOffre extends StatefulWidget {
 }
 
 class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponibleOffre> {
-  late bool statut;
   bool _showProposeButton = false;
   int period = 1;
   int price = 20;
   @override
   void initState() {
     super.initState();
-    statut = widget.statut;
   }
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-      ),
-      builder: (BuildContext context) {
-        int period = 1; // Local state for period (e.g., number of nights)
-        int price = 20; // Local state for price
-
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.close, color: Colors.black),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Proposition de prix',
-                            style: GoogleFonts.roboto(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    'Proposez une offre de prix afin de répondre à cette demande.',
-                    style: GoogleFonts.roboto(
-                      fontSize: 12.sp,
-                      color: Colors.grey,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildIncrementDecrementWidget(
-                          "Période(Nuit)", period, (newPeriod) {
-                        setState(() {
-                          period = newPeriod;
-                        });
-                      }),
-                      SizedBox(width: 20.w),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildIncrementDecrementWidget(
-                              "Prix", price, (newPrice) {
-                            setState(() {
-                              price = newPrice;
-                            });
-                          }),
-                          SizedBox(width: 10.w),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 0.h),
-                            child: Image.asset(
-                              "assets/icons/coins.png",
-                              width: 50.w,
-                              height: 50.h,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      // Update the global price state here if needed
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
-                    ),
-                    child: Text(
-                      'Valider',
-                      style: GoogleFonts.roboto(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildIncrementDecrementWidget(
-      String label, int value, Function(int) onChanged, {
-        bool showCoin = false,
-      }) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.19.sp,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8.h), // Add some space between the label and the controls
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center, // Center the row content
-          children: [
-            Column(
-              children: [
-                Container(
-                  width: 30.w,
-                  height: 30.h,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF0099D5)),
-                    borderRadius: BorderRadius.circular(6.6),
-                  ),
-                  child: Center(
-                    child: IconButton(
-                      iconSize: 20.w,
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        if (value > 1) {
-                          onChanged(value - 1);
-                        }
-                      },
-                      icon: Icon(Icons.remove),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Container(
-                  width: 30.w,
-                  height: 30.h,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFF0099D5)),
-                    borderRadius: BorderRadius.circular(6.6),
-                  ),
-                  child: Center(
-                    child: IconButton(
-                      iconSize: 20.w,
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        onChanged(value + 1);
-                      },
-                      icon: Icon(Icons.add),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 5.w),
-            Container(
-              width: 70.w,
-              height: 40.h,
-              margin: EdgeInsets.fromLTRB(0, 0, 0, 1.3),
-              decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFF0099D5)),
-                borderRadius: BorderRadius.circular(6),
-                color: Color(0xFFF4F6F5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x11124565),
-                    offset: Offset(0, 4),
-                    blurRadius: 7,
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  "$value",
-                  style: TextStyle(fontSize: 16.sp),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-
-
-
-
   bool _showOfferText = true;
-
-  void _handleCancelPressed() {
-    setState(() {
-      _showProposeButton = true;
-    });
-    // Logique pour annuler l'offre
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +65,11 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
           MaterialPageRoute(
             builder: (context) => RentalItemDetailPage(
               demandId: widget.demandId,
+              description: widget.description,
               imageUrl: widget.imageUrl,
+              userEmail: widget.userEmail,
+              phoneNumber: widget.phoneNumber,
+              userImage: widget.userImage,
               title: widget.title,
               date: widget.date,
               evalue: widget.evalue,
@@ -282,212 +77,122 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
               location: widget.location,
               ownerName: widget.ownerName,
               statut: widget.statut,
-              ownerImageUrl: '',
             ),
           ),
         );
       },
-    child: Card(
-      margin: EdgeInsets.all(8.w),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.r),
-      ),
-      color: Colors.white,
-      child: Padding(
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image Section
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10.r),
-              child: Image.asset(
-                widget.imageUrl,
-                width: double.infinity,
-                height: 150.h,
-                fit: BoxFit.cover,
+      child: Card(
+        margin: EdgeInsets.all(8.w),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.r),
+        ),
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(12.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: Image.asset(
+                  widget.imageUrl,
+                  width: double.infinity,
+                  height: 150.h,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            SizedBox(height: 12.h),
-
-            // Title and Owner Section
-            Row(
-              children: [
-                Text(
-                  widget.title,
-                  style: GoogleFonts.roboto(
-                    fontSize: 14.96.sp,
-                    fontWeight: FontWeight.w600,
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18.r,
+                    backgroundImage: FileImage(File(widget.userImage)),
                   ),
-                ),
-                SizedBox(width: 8.w),
-                CircleAvatar(
-                  radius: 18.r,
-                  backgroundImage: AssetImage("assets/images/img_6.png"),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  widget.ownerName,
-                  style: GoogleFonts.roboto(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-
-            // Description Section
-            Text(
-              widget.date,
-              style: GoogleFonts.roboto(
-                fontSize: 12.42.sp,
-                fontWeight: FontWeight.w300,
-                color: Colors.grey[600],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 8.h),
-
-            // Status Section
-            Text(
-              widget.evalue ? 'TRUE' : 'FALSE',
-              style: GoogleFonts.roboto(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
-                color: widget.evalue ? Colors.green : Colors.red,
-              ),
-            ),
-            SizedBox(height: 8.h),
-
-            // Price Section
-            Text(
-              "Budget: ${widget.budget}£",
-              style: GoogleFonts.roboto(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined, color: Colors.blue, size: 18.sp),
-                SizedBox(width: 4.w),
-                Text(
-                  widget.location,
-                  style: GoogleFonts.roboto(
-                    fontSize: 12.sp,
-                    color: Color(0xFF0C3469),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-
-            statut
-                ?Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (_showOfferText) // Conditionally show or hide the text
-          Text(
-            'Offre en attente',
-            style: GoogleFonts.roboto(
-              fontSize: 12.sp,
-              color: Colors.green,
-            ),
-          ),
-        Row(
-          children: [
-            if (!_showProposeButton) ...[
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(
-                      vertical: 8.h, horizontal: 16.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                ),
-                onPressed: widget.onProposerOffrePressed,  // Assurez-vous que cette méthode est définie et gère la logique souhaitée
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Proposer une offre',
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      widget.ownerName,
                       style: GoogleFonts.roboto(
-                          fontSize: 12.sp, color: Colors.white),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                widget.title,
+                style: GoogleFonts.roboto(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Row(
+                children: [
+                  Icon(Icons.date_range, color: Colors.blue),
+                  SizedBox(width: 8.w),
+                  Text(
+                    widget.date,
+                    style: GoogleFonts.roboto(
+                      fontSize: 14.sp,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Icon(Icons.description, color: Colors.blue),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      widget.description,
+                      style: GoogleFonts.roboto(
+                        fontSize: 14.sp,
+                        color: Colors.grey[800],
+                      ),
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(width: 8.w),
-                    Image.asset("assets/icons/offre.png",
-                        height: 16.sp, width: 16.sp),
-                  ],
-                ),
-              )
-            ] else ...[
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(
-                      vertical: 8.h, horizontal: 16.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                ),
-                onPressed: () => _showBottomSheet(context),
-                child: Text(
-                  'Proposer une offre',
-                  style: GoogleFonts.roboto(
-                    fontSize: 12.sp,
-                    color: Colors.white,
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  Image.asset("assets/icons/tokenicon.png", width: 20),
+                  SizedBox(width: 8.w),
+                  Text(
+                    "Budget: ${widget.budget.toStringAsFixed(2)}",
+                    style: GoogleFonts.roboto(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
+                ],
+              ),
+              SizedBox(height: 8.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.statut,
+                    style: GoogleFonts.roboto(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: widget.statut == 'open' ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ],
-        ),
-      ],
-    )
-                : Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(
-                      vertical: 10.h, horizontal: 16.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                ),
-                onPressed: () {
-                  _showBottomSheet(context);
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-
-                    Text(
-                      'Proposer une offre',
-                      style: GoogleFonts.roboto(
-                          fontSize: 12.sp, color: Colors.white),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(width: 8.w),
-                    Image.asset("assets/icons/offre.png",
-                        height: 16.sp, width: 16.sp),
-
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-    ),
     );
   }
 }

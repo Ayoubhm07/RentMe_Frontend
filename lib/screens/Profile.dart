@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/components/Stepper/ProfileStepper.dart';
 import 'package:khedma/components/navbara.dart';
+import 'package:khedma/screens/AchatToken.dart';
 import 'package:khedma/screens/SideMenu.dart';
 
 import '../Services/SharedPrefService.dart';
@@ -156,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     SizedBox(width: 10),
                                     Text(
-                                      '99',
+                                      user!.balance.toString(),
                                       style: GoogleFonts.getFont(
                                         'Roboto',
                                         fontWeight: FontWeight.bold,
@@ -193,8 +194,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
                                   builder: (BuildContext context) {
-                                    return Container();
+                                    return FractionallySizedBox(
+                                      heightFactor: 0.85, // Adjust this value to change the height of the modal
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                          ),
+                                        ),
+                                        child: AchatTokenScreen(), // Your custom widget for purchasing tokens
+                                      ),
+                                    );
                                   },
                                 );
                               },

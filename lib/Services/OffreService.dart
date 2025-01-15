@@ -1,13 +1,22 @@
 import 'dart:convert';
 
+import 'package:khedma/Services/DemandeService.dart';
+import 'package:khedma/Services/UserService.dart';
+import 'package:khedma/entities/Demand.dart';
+import 'package:khedma/entities/NotificationRequest.dart';
+
 import '../entities/Offre.dart';
+import '../entities/User.dart';
+import 'NotificationService.dart';
 import 'SharedPrefService.dart';
 import 'package:http/http.dart' as http;
 
 class OffreService {
   final String url = "http://localhost:8080/od/offer";
   SharedPrefService sharedPrefService = SharedPrefService();
-
+  NotificationService notificationService = NotificationService();
+  DemandeService demandeService =DemandeService();
+  UserService userService = UserService();
   Future<List<Offre>> getOffersByDemand(int id) async {
     String accessToken = await sharedPrefService.readUserData('accessToken');
     try {
@@ -95,7 +104,13 @@ class OffreService {
   }
 
   Future<Offre> createOffer(Offre offer) async {
+
+    User user = await sharedPrefService.getUser();
+    Demand demand = await demandeService.getDemandById(offer.demandId);
+    int receiverId = demand.userId;
+    User receiver = await userService.findUserById(receiverId);
     String accessToken = await sharedPrefService.readUserData('accessToken');
+    print("User FCM Token: ${user.fcmToken}");
     try {
       final response = await http.post(
         Uri.parse('$url/create'),
@@ -107,8 +122,20 @@ class OffreService {
       );
 
       if (response.statusCode == 200) {
-        print('Offre créée avec succès');
-        return Offre.fromJson(json.decode(response.body));
+        if (user.fcmToken != null && user.fcmToken!.isNotEmpty) {
+          NotificationRequest notificationRequest = NotificationRequest(
+              title: "Nouvelle offre ajoutée",
+              body: "Vous avez recu une offre de la part de ${user.userName}",
+              token: receiver.fcmToken ?? "",
+              userId: receiverId ,
+              topic: 'offre');
+          await notificationService.sendNotificationByToken(notificationRequest);
+          print('Offre créée avec succès');
+          return Offre.fromJson(json.decode(response.body));
+        } else {
+          print("No FCM token available; skipping notification send.");
+          return Offre.fromJson(json.decode(response.body));
+        }
       } else {
         throw Exception('Échec de la création de l\'offre: ${response.reasonPhrase}');
       }
@@ -117,6 +144,8 @@ class OffreService {
       throw Exception('Erreur de connexion: $e');
     }
   }
+
+
 
   Future<List<Offre>> getOffersByUserIdAndStatus(int userId, String status) async {
     String accessToken = await sharedPrefService.readUserData('accessToken');

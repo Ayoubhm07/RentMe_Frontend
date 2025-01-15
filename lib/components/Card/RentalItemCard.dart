@@ -11,11 +11,17 @@ class RentalItemCardDisponible extends StatelessWidget {
   final String ownerName;
   final VoidCallback onContactPressed;
   final VoidCallback onRentPressed;
+  final String userEmail;
+  final String phoneNumber;
+  final String address;
 
   const RentalItemCardDisponible({
     Key? key,
     required this.imageUrl,
     required this.title,
+    required this.userEmail,
+    required this.phoneNumber,
+    required this.address,
     required this.description,
     required this.price,
     required this.location,
@@ -37,7 +43,6 @@ class RentalItemCardDisponible extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Section
             ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
               child: Image.asset(
@@ -48,138 +53,134 @@ class RentalItemCardDisponible extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-
-            // Title and Owner Section
-            Row(
-              children: [
-
-               Text(
-                    title,
-                    style: GoogleFonts.roboto(
-                      fontSize: 14.96.sp,
-                      fontWeight: FontWeight.w600,
-
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                CircleAvatar(
-                  radius: 18.r,
-                  backgroundImage: AssetImage("assets/images/img_6.png"),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  ownerName,
-                  style: GoogleFonts.roboto(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
+            Text(
+              title,
+              style: GoogleFonts.roboto(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(height: 8.h),
-
-            // Description Section
             Text(
               description,
               style: GoogleFonts.roboto(
-                fontSize: 12.42.sp,
-                fontWeight: FontWeight.w300,
+                fontSize: 12.sp,
                 color: Colors.grey[600],
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: 8.h),
-
-            // Price and Location Section
             Text(
-              '$price',
+              'Category: $location',
               style: GoogleFonts.roboto(
                 fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
               ),
             ),
             SizedBox(height: 8.h),
             Row(
               children: [
-                Icon(Icons.book_online_outlined, color: Colors.blue, size: 18.sp),
+                Image.asset("assets/icons/tokenicon.png", width: 20),
                 SizedBox(width: 4.w),
-
                 Text(
-                    location,
-                    style: GoogleFonts.roboto(
-                      fontSize: 12.sp,
-                      color: Color(0xFF0C3469),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  '$price',
+                  style: GoogleFonts.roboto(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-
+                ),
               ],
             ),
-            SizedBox(height: 8.h),
-
-            // Buttons Section
+            SizedBox(height: 12.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: 150.w,
-                  height: 30.h,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: EdgeInsets.symmetric(vertical: 4.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                    onPressed: onContactPressed,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Contacter le propriétaire',
-                          style: GoogleFonts.roboto(fontSize: 10.sp, color: Colors.white),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(width: 6.w),
-                        Image.asset(
-                          "assets/icons/message.png",
-                          height: 16.h,
-                        ),
-                      ],
+                CircleAvatar(
+                  radius: 18.r,
+                  backgroundImage: AssetImage("assets/images/img_6.png"),
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    ownerName,
+                    style: GoogleFonts.roboto(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.grey[700],
                     ),
                   ),
                 ),
-                SizedBox(width: 8.w),
-                SizedBox(
-                  width: 120.w,
-                  height: 30.h,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 4.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Icon(Icons.phone, color: Colors.blue),
+                SizedBox(width: 4.w),
+                Text(
+                  phoneNumber,
+                  style: GoogleFonts.roboto(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Icon(Icons.email, color: Colors.blue),
+                SizedBox(width: 4.w),
+                Text(
+                  userEmail,
+                  style: GoogleFonts.roboto(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Icon(Icons.location_on, color: Colors.blue),
+                SizedBox(width: 4.w),
+                Expanded(
+                  child: Text(
+                    address,
+                    style: GoogleFonts.roboto(
+                      fontSize: 12.sp,
+                      color: Colors.grey[600],
                     ),
-                    onPressed: onRentPressed,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Louer cet article',
-                          style: GoogleFonts.roboto(fontSize: 10.sp, color: Colors.white),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(width: 4.w),
-                        Image.asset(
-                          "assets/icons/img_8.png",
-                          height: 16.h,
-                        ),
-                      ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(Icons.message, color: Colors.white),
+                  label: Text('Contacter le propriétaire',     style: TextStyle(color: Colors.white, fontSize: 10.sp) // Smaller font size
+                  ),
+                  onPressed: onContactPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 12.w), // Reduced vertical padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.shopping_cart, color: Colors.white),
+                  label: Text('Louer cet article', style: TextStyle(color: Colors.white, fontSize: 10.sp) // Smaller font size
+                  ),
+                  onPressed: onRentPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 10.w), // Reduced vertical padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),

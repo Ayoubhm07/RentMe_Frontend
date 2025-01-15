@@ -4,17 +4,17 @@ import 'package:khedma/Services/SharedPrefService.dart';
 import '../entities/ProfileDetails.dart';
 
 class ProfileService {
-  final String apiUrl = 'http://localhost:8080/profileDetail'; // L'URL de votre API Gateway
+  final String apiUrl = 'http://localhost:8080/profileDetail';
   SharedPrefService sharedPrefService = SharedPrefService();
   Future<bool> saveProfileDetails(ProfileDetails profileDetails) async {
     String accessToken = await sharedPrefService.readUserData('accessToken');
     final response = await http.post(
-      Uri.parse('$apiUrl/create'), // Point de terminaison pour sauvegarder les détails du profil
+      Uri.parse('$apiUrl/create'),
       headers: {
         'Content-Type' : 'application/json',
         'Authorization' : 'Bearer $accessToken',
       },
-      body: jsonEncode(profileDetails.toJson()), // Convertir les détails du profil en JSON
+      body: jsonEncode(profileDetails.toJson()),
     );
 
     if (response.statusCode == 200) {
