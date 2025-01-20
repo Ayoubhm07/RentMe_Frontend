@@ -89,7 +89,7 @@ class OffersSection extends StatelessWidget {
                               description: location.description,
                               price: "${location.prix}/${location.timeUnit}",
                               location: location.category,
-                              phoneNumber: user.numTel,
+                              phoneNumber: user.numTel!,
                               userEmail: user.email,
                               address: "${profileDetails.ville},${profileDetails.rue},${profileDetails.codePostal},${profileDetails.pays}",
                               ownerName: user.userName,

@@ -41,11 +41,11 @@ class FormExperienceController {
   }
 
   void save() {
-    sharedPrefService.saveUserData('titre', titreController.text);
-    sharedPrefService.saveUserData('nomSocieteExp', nomSocieteController.text);
-    sharedPrefService.saveUserData('descriptionExp', desctiptionController.text);
-    sharedPrefService.saveUserData('startDateExp', startDate.toString());
-    sharedPrefService.saveUserData('endDateExp', endDate.toString());
+    sharedPrefService.saveStringToPrefs('titre', titreController.text);
+    sharedPrefService.saveStringToPrefs('nomSocieteExp', nomSocieteController.text);
+    sharedPrefService.saveStringToPrefs('descriptionExp', desctiptionController.text);
+    sharedPrefService.saveStringToPrefs('startDateExp', startDate.toString());
+    sharedPrefService.saveStringToPrefs('endDateExp', endDate.toString());
   }
 }
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:khedma/entities/SavaData.dart';
 
 import '../entities/User.dart';
 import 'JWTService.dart';
@@ -14,24 +13,39 @@ class UserService {
 
   Future<bool> saveUser(User user) async {
     try {
-      final response = await http.post(Uri.parse('$apiUrl/register'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(user.toJson()));
-      if (response.statusCode == 200) {
-        User user = User.fromJson(json.decode(response.body));
-        sharedPrefService.saveUser(user);
+      final response = await http.post(
+        Uri.parse('$apiUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(user.toJson()),
+      );
+
+      if (response.statusCode == 201) {
+        // User created successfully
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        User user = User.fromJson(responseBody);
+        await sharedPrefService.saveUser(user);
+        await sharedPrefService.checkAllValues();
         print('User saved successfully');
         return true;
+      } else if (response.statusCode == 409) {
+        // Conflict: User already exists
+        print('User already exists');
+        return false;
+      } else if (response.statusCode == 500) {
+        // Internal server error
+        print('Internal server error: ${response.reasonPhrase}');
+        return false;
       } else {
-        throw Exception(
-            'Échec de l\'enregistrement du user: ${response.reasonPhrase}');
+        // Other errors
+        print('Failed to save user: ${response.statusCode} ${response.reasonPhrase}');
+        print('Response body: ${response.body}');
+        return false;
       }
     } catch (e) {
-      print('Erreur de connexion: $e');
-      throw Exception('Erreur de connexion: $e');
+      print('Connection error: $e');
+      return false;
     }
   }
-
   Future<bool> authenticate(String email, String password) async {
     try {
       final response = await http.post(Uri.parse('$apiUrl/authenticate'),
@@ -42,8 +56,8 @@ class UserService {
         Map<String, dynamic> data = json.decode(response.body);
         String accessToken = data['accessToken'];
         String refreshToken = data['refreshToken'];
-        sharedPrefService.saveUserData("accessToken", accessToken);
-        sharedPrefService.saveUserData("refreshToken", refreshToken);
+        sharedPrefService.saveStringToPrefs("accessToken", accessToken);
+        sharedPrefService.saveStringToPrefs("refreshToken", refreshToken);
         return true;
       } else {
         throw Exception(
@@ -53,10 +67,88 @@ class UserService {
       throw Exception('Erreur de connexion: $e');
     }
   }
+  Future<String> verifyEmail(int userId, int code) async {
+    String token = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/verifyEmail/$userId/$code'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
+      if (response.statusCode == 200) {
+        return "Code verified";
+      } else if (response.statusCode == 404) {
+        return 'No code found';
+      } else if (response.statusCode == 400) {
+        return 'Invalid code or code expired';
+      } else {
+        throw Exception('Failed to verify email: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+  Future<String> verifyNumber(int userId, int code) async {
+    String token = await sharedPrefService.readStringFromPrefs('accessToken');
 
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/verifyPhone/$userId/$code'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
+      if (response.statusCode == 200) {
+        return "Code verified";
+      } else if (response.statusCode == 404) {
+        return 'No code found';
+      } else if (response.statusCode == 400) {
+        return 'Invalid code or code expired';
+      } else {
+        throw Exception('Failed to verify email: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+  Future<String> resendVerificationCode(String email) async {
+    String token = await sharedPrefService.readStringFromPrefs('accessToken');
+
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/resendVerificationCode/$email'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          });
+      if (response.statusCode == 200) {
+        return 'Code sent successfully';
+      } else {
+        throw Exception('Failed to resend verification code: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+  Future<String> sendSMS(String email) async {
+    String token = await sharedPrefService.readStringFromPrefs('accessToken');
+
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/sendPhoneVerificationCode/$email'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          });
+      if (response.statusCode == 200) {
+        return 'Code sent successfully';
+      } else {
+        throw Exception('Failed to send SMS: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
   Future<bool> getCurrentUserByUsername() async {
     try {
-      String token = await sharedPrefService.readUserData('accessToken');
+      String token = await sharedPrefService.readStringFromPrefs('accessToken');
       String username = jwtService.getUsernameFromToken(token)['sub'];
       var response = await http.get(
         Uri.parse('$apiUrl/getUserByEmail/$username'),
@@ -73,11 +165,10 @@ class UserService {
       throw Exception('Failed to load user: $e');
     }
   }
-
   Future<bool> updateUser(User user) async {
     try {
       print('Updating user...' + user.toString());
-      String token = await sharedPrefService.readUserData('accessToken');
+      String token = await sharedPrefService.readStringFromPrefs('accessToken');
       var response = await http.put(
         Uri.parse('$apiUrl/updateUser'),
         headers: {
@@ -98,10 +189,9 @@ class UserService {
       throw Exception('Failed to update user: $e');
     }
   }
-
   Future<User> getUserById(String namePerUser)async {
     try {
-      String token = await sharedPrefService.readUserData('accessToken');
+      String token = await sharedPrefService.readStringFromPrefs('accessToken');
       var response = await http.get(
         Uri.parse('$apiUrl/getUserById/$namePerUser'),
         headers: {'Authorization': 'Bearer $token'},
@@ -116,10 +206,9 @@ class UserService {
       throw Exception('Failed to load user: $e');
     }
   }
-
   Future<User> findUserById(int id)async {
     try {
-      String token = await sharedPrefService.readUserData('accessToken');
+      String token = await sharedPrefService.readStringFromPrefs('accessToken');
       var response = await http.get(
         Uri.parse('$apiUrl/findUserById/$id'),
         headers: {'Authorization': 'Bearer $token'},

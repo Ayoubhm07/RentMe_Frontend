@@ -5,11 +5,11 @@ import '../entities/NotificationRequest.dart';
 import 'SharedPrefService.dart'; // Make sure the path is correct
 
 class NotificationService {
-  final String baseUrl = 'http://192.168.197.249:9096/notification';
+  final String baseUrl = 'http://localhost:8080/notification';
   SharedPrefService _sharedPrefService = SharedPrefService();
 
   Future<String> saveDeviceToken(int userId, String fcmToken) async {
-    String accessToken = await _sharedPrefService.readUserData('accessToken');
+    String accessToken = await _sharedPrefService.readStringFromPrefs('accessToken');
     var url = Uri.parse('$baseUrl/save-device/$userId');
     try {
       var response = await http.put(
@@ -33,7 +33,7 @@ class NotificationService {
   }
 
   Future<NotificationResponse> sendNotificationByToken(NotificationRequest request) async {
-    String accessToken = await _sharedPrefService.readUserData('accessToken');
+    String accessToken = await _sharedPrefService.readStringFromPrefs('accessToken');
     var url = Uri.parse('$baseUrl/sendByToken');
     try {
       var response = await http.post(
@@ -56,7 +56,7 @@ class NotificationService {
   }
 
   Future<List<NotificationMessage>> getNotificationsByUserId(int userId) async {
-    String accessToken = await _sharedPrefService.readUserData('accessToken');
+    String accessToken = await _sharedPrefService.readStringFromPrefs('accessToken');
     var url = Uri.parse('$baseUrl/getByUserId/$userId');
     try {
       var response = await http.get(

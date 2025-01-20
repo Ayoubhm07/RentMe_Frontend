@@ -13,7 +13,7 @@ class ConversationAndMessageService {
 
   Future<List<Conversation>> FetchUserConversation(int id) async {
     try {
-      String accessToken = await sharedPrefService.readUserData('accessToken');
+      String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
 
       var response = await http.get(
         Uri.parse('$apiUrl/conversation/getConversationsByUserId/$id'),

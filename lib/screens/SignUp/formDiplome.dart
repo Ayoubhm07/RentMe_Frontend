@@ -28,7 +28,7 @@ class FormDiplomeController {
   }
 
   void save() {
-    sharedPrefService.saveUserData('diplome', _selectedDiplome);
+    sharedPrefService.saveStringToPrefs('diplome', _selectedDiplome);
     String formations = '';
     for (String f in _selectedFormatinos) {
       if (formations.isEmpty) {
@@ -39,7 +39,7 @@ class FormDiplomeController {
         }
       }
     }
-    sharedPrefService.saveUserData('formations', formations);
+    sharedPrefService.saveStringToPrefs('formations', formations);
   }
 }
 

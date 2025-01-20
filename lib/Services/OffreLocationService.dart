@@ -9,7 +9,7 @@ class OffreLocationService {
   SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<List<OffreLocation>> getOffersByLocation(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getbylocation/$id'),
@@ -39,7 +39,7 @@ class OffreLocationService {
   }
 
   Future<OffreLocation> acceptOffer(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$id/accept'),
@@ -63,7 +63,7 @@ class OffreLocationService {
   }
 
   Future<OffreLocation> terminerOffre(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$id/done'),
@@ -87,7 +87,7 @@ class OffreLocationService {
   }
 
   Future<OffreLocation> rejectOffer(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$id/reject'),
@@ -112,7 +112,7 @@ class OffreLocationService {
 
 
   Future<List<OffreLocation>> getOffersByUser(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getbyuser/$userId'),
@@ -139,7 +139,7 @@ class OffreLocationService {
 
 
   Future<OffreLocation> createOffer(OffreLocation offer) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.post(
         Uri.parse('$url/create'),
@@ -163,7 +163,7 @@ class OffreLocationService {
   }
 
   Future<List<OffreLocation>> getOffersByUserIdAndStatus(int userId, String status) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByUserIdandStatus/$userId/$status'),
@@ -189,7 +189,7 @@ class OffreLocationService {
 
 
   Future<List<OffreLocation>> getOffersByLocationIdAndStatus(int locationId, String status) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByLocationIdandStatus/$locationId/$status'),
@@ -214,7 +214,7 @@ class OffreLocationService {
   }
 
   Future<String> deleteOffer(int offerId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.delete(
         Uri.parse('$url/deleteOffer/$offerId'),

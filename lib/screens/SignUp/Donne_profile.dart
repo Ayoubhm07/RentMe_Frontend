@@ -33,8 +33,8 @@ class DonneeProfileController
 
   void save()
   {
-    sharedPrefService.saveUserData('newRole', selectedProfile);
-    sharedPrefService.saveUserData('image', selectedImagePath);
+    sharedPrefService.saveStringToPrefs('newRole', selectedProfile);
+    sharedPrefService.saveStringToPrefs('image', selectedImagePath);
   }
 
 }
@@ -293,7 +293,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'expert';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(
@@ -340,7 +340,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'amateur';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(
@@ -386,7 +386,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'professionel';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(

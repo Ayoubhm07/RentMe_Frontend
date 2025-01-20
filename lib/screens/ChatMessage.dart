@@ -65,8 +65,8 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
   }
 
   void _connectWebSocket() async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    String username = widget.currentUser.userName;
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    String username = widget.currentUser.userName!;
     String conversationId = widget.conversationId.toString();
 
     final headers = {
@@ -311,7 +311,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                           invitees: [
                             ZegoUIKitUser(
                               id: widget.receiver.id.toString(),
-                              name: widget.receiver.userName,
+                              name: widget.receiver.userName!,
                             )
                           ],
                         ),
@@ -325,7 +325,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                           invitees: [
                             ZegoUIKitUser(
                               id: widget.receiver.id.toString(),
-                              name: widget.receiver.userName,
+                              name: widget.receiver.userName!,
                             )
                           ],
                         ),

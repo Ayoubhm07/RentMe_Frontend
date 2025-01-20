@@ -34,11 +34,11 @@ class FormSocieteController {
 
   void save() {
     // save the data to shared preferences
-    sharedPrefService.saveUserData('NomSociete', nomSocieteController.text);
-    sharedPrefService.saveUserData('DomaineActivite', domaineActiviteController.text);
-    sharedPrefService.saveUserData('KBIS', _selectedDocuments[0]);
-    sharedPrefService.saveUserData('LabelQualite', _selectedDocuments[1]);
-    sharedPrefService.saveUserData('Assurance', _selectedDocuments[2]);
+    sharedPrefService.saveStringToPrefs('NomSociete', nomSocieteController.text);
+    sharedPrefService.saveStringToPrefs('DomaineActivite', domaineActiviteController.text);
+    sharedPrefService.saveStringToPrefs('KBIS', _selectedDocuments[0]);
+    sharedPrefService.saveStringToPrefs('LabelQualite', _selectedDocuments[1]);
+    sharedPrefService.saveStringToPrefs('Assurance', _selectedDocuments[2]);
   }
 }
 

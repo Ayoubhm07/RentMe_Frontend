@@ -5,24 +5,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../entities/User.dart';
 
-
-
 class SharedPrefService {
 // Example to store data
-  Future<void> saveUserData(String key, String value) async {
+  Future<void> saveStringToPrefs(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
   }
 
 // Example to read data
-  Future<String> readUserData(String key) async {
+  Future<String> readStringFromPrefs(String key) async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(key) ?? '';
     return value;
   }
 
 // clear field
-  Future<void> clearUserData(String key) async {
+  Future<void> clearStringFromPrefs(String key) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
@@ -43,6 +41,7 @@ class SharedPrefService {
       print('Read $key: $value');
     }
   }
+
   Future<void> saveUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
     String userJson = jsonEncode(user.toJson());
@@ -52,8 +51,19 @@ class SharedPrefService {
   Future<User> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     String? userJson = await prefs.getString('user');
-      Map<String, dynamic> userMap = jsonDecode(userJson!);
-      return User.fromJson(userMap);
+    if (userJson == null) {
+      return User(
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          dateNaissance: DateTime.now(),
+          userName: '',
+          roles: '',
+          sexe: '');
+    }
+    Map<String, dynamic> userMap = jsonDecode(userJson!);
+    return User.fromJson(userMap);
   }
 
   Future<void> saveProfileDetails(ProfileDetails profileDetails) async {
@@ -65,11 +75,7 @@ class SharedPrefService {
   Future<ProfileDetails> getProfileDetails() async {
     final prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString('profileDetails');
-      Map<String, dynamic> userMap = jsonDecode(userJson!);
-      return ProfileDetails.fromJson(userMap);
-
+    Map<String, dynamic> userMap = jsonDecode(userJson!);
+    return ProfileDetails.fromJson(userMap);
   }
-
-
-
 }

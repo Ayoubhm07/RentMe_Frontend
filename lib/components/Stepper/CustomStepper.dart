@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:khedma/Services/ProfileService.dart';
@@ -25,18 +27,22 @@ class CustomStepper extends StatefulWidget {
 class CustomStepperState extends State<CustomStepper> {
   int currentStep = 0;
   int totalSteps = 4;
-  late UserService us;
-  late ProfileService profileService;
-  late SharedPrefService sharedPrefService;
+  UserService userService = UserService();
+  ProfileService profileService = ProfileService();
+  SharedPrefService sharedPrefService = SharedPrefService();
   final SignUpFormController signUpFormController = SignUpFormController();
+  final VerificationMailController verificationMailController =
+      VerificationMailController();
+  final PhoneInputController phoneInputController = PhoneInputController();
+  final VerificationPageController verificationPageController =
+      VerificationPageController();
+
   Map<String, dynamic> validationErrors = {};
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    us = UserService();
-    profileService = ProfileService();
-    sharedPrefService = SharedPrefService();
   }
 
   @override
@@ -44,58 +50,48 @@ class CustomStepperState extends State<CustomStepper> {
     super.dispose();
   }
 
-  Future<void> SaveUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String day = prefs.getString('day') ?? '';
-    String month = prefs.getString('month') ?? '';
-    String year = prefs.getString('year') ?? '';
-    String email = prefs.getString('email') ?? '';
-    String password = prefs.getString('password') ?? '';
-    DateTime dob = DateTime(int.parse(year), int.parse(month), int.parse(day));
-    User user = User(
-        firstName: prefs.getString('firstName') ?? '',
-        lastName: prefs.getString('lastName') ?? '',
-        email: email,
-        password: password,
-        numTel: prefs.getString('numTel') ?? '',
-        userName: prefs.getString('userName') ?? '',
-        roles: '',
-        dateNaissance: dob,
-        isProfileCompleted: false,
-        isAccountBanned: false);
-    await sharedPrefService.clearAllUserData();
-    bool gotUser = false ;
-    bool connected = false ;
-    gotUser =  await us.saveUser(user);
-    if(gotUser == true ){
-      connected = await us.authenticate(email,password);
-      int userId = await us.sharedPrefService.getUser().then((value) => value.id!);
-      if(connected == true){
-        print('user and profile saved');
-
-        ProfileDetails profileDetails = ProfileDetails(userId: userId);
-        profileDetails.profilePicture = 'images_default.png';
-        await profileService.saveProfileDetails(profileDetails);
-      }
-    }
+  Future<bool> saveUser() async {
+    User user = await sharedPrefService.getUser();
+    print("2 - user from shared pref: $user");
+    bool response = await userService.saveUser(user);
+    print("2 - shared pref after save: ");
+    await sharedPrefService.checkAllValues();
+    return response;
   }
 
-  Map<String, dynamic> _validateStep(int step) {
-    switch (step) {
-      case 0:
-        return signUpFormController.validate();
-      case 1:
-        return signUpFormController.validate();
-      case 2:
-        // Add validation logic for step 2
-        return signUpFormController.validate();
-      case 3:
-        // Add validation logic for step 3
-        return signUpFormController.validate();
-      default:
-        return signUpFormController.validate();
-    }
+  Future<bool> authenticateUser() async {
+    User user = await sharedPrefService.getUser();
+    print(" 3 - user when authenticating :  $user");
+    String password = await sharedPrefService.readStringFromPrefs('password');
+    bool response = await userService.authenticate(user.email, password);
+    print("3 - user after authenticate: ");
+    await sharedPrefService.checkAllValues();
+    await saveProfileDetails();
+    return response;
   }
+
+  Future<bool> updateUser() async {
+    User user = await sharedPrefService.getUser();
+    print("5- user before updating : $user");
+    bool response = await userService.updateUser(user);
+    print("5- user after updating : ");
+    await sharedPrefService.checkAllValues();
+    return response;
+  }
+
+  Future<String> sendSms() async {
+    User user = await sharedPrefService.getUser();
+    String response = await userService.sendSMS(user.email);
+    return response;
+  }
+
+  Future<void> saveProfileDetails() async {
+    User user = await sharedPrefService.getUser();
+    ProfileDetails profileDetails = ProfileDetails(userId: user.id! ,
+    profilePicture: 'images_default.png');
+    await profileService.saveProfileDetails(profileDetails);
+  }
+
   Widget _getPageForStep(int step) {
     switch (step) {
       case 0:
@@ -103,20 +99,70 @@ class CustomStepperState extends State<CustomStepper> {
         return SignUpScreen(controller: signUpFormController);
       case 1:
         print('case  1');
-        return VerificationMailPage();
+        return VerificationMailPage(controller: verificationMailController);
       case 2:
         print('case  2');
-        return PhoneInput();
+        return PhoneInput(controller: phoneInputController);
       case 3:
         print('case  3');
-        return VerificationPage();
+        return VerificationPage(controller: verificationPageController);
       case 4:
         print('case  4');
-
-        SaveUserData();
         return Steppercomplet();
       default:
         return const Center(child: Text('Étape inconnue'));
+    }
+  }
+
+  Future<Map<String, dynamic>> _validateStep(int step) async {
+    switch (step) {
+      case 0:
+        setState(() {
+          isLoading = true;
+        });
+        Map<String , dynamic> result = await signUpFormController.validate();
+        if (result.isNotEmpty) {
+          return signUpFormController.validate();
+        }
+        bool userSaved = await saveUser();
+
+        if (userSaved == false) {
+          return {'error': true, 'message': 'Failed to save user'};
+        } else {
+          bool userAuthenticated = await authenticateUser();
+          if (userAuthenticated == false) {
+            return {'error': true, 'message': 'Failed to authenticate user'};
+          } else {
+            return {};
+          }
+        }
+      case 1:
+        return verificationMailController.validate();
+      case 2:
+        setState(() {
+          isLoading = true;
+        });
+        Map<String, dynamic> result = await phoneInputController.validate();
+        if (result.isNotEmpty) {
+          return phoneInputController.validate();
+        }
+        bool userUpdated = await updateUser();
+        String smsSent = '';
+
+        if (userUpdated == false) {
+          return {'error': true, 'message': 'Failed to update user'};
+        } else {
+          smsSent = await sendSms();
+        }
+        if (smsSent == 'Error sending sms') {
+          return {'error': true, 'message': 'Failed to send sms'};
+        } else {
+          return {};
+        }
+      case 3:
+        return verificationPageController.validate();
+      default:
+        return signUpFormController.validate();
     }
   }
 
@@ -210,11 +256,11 @@ class CustomStepperState extends State<CustomStepper> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileStepper()),
-                  );
-                },
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileStepper()),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 backgroundColor: AppTheme.primaryColor,
@@ -235,12 +281,10 @@ class CustomStepperState extends State<CustomStepper> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                  // redirect to home
-
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -266,46 +310,55 @@ class CustomStepperState extends State<CustomStepper> {
         child: Center(
           child: SizedBox(
             width: 0.4.sw,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  this.validationErrors = _validateStep(currentStep);
-                  if (this.validationErrors.isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(validationErrors['message']),
-                        backgroundColor: Colors.redAccent,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 1),
-                        action: SnackBarAction(
-                          label: 'OK',
-                          textColor: Colors.white,
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          },
-                        ),
+            child: isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: () async {
+                      try{
+                      validationErrors = await _validateStep(currentStep);
+                      }catch(e){
+                        print(e);
+                        validationErrors = {'error': true, 'message': "une erreur s'est produite"};
+                      }
+                      setState(() {
+                        isLoading = false;
+                        if (validationErrors.isNotEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(validationErrors['message']),
+                              backgroundColor: Colors.redAccent,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 1),
+                              action: SnackBarAction(
+                                label: 'OK',
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                },
+                              ),
+                            ),
+                          );
+                        } else {
+                          currentStep++;
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.33.r),
                       ),
-                    );
-                  } else {
-                    currentStep++;
-                  }
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
-                backgroundColor: AppTheme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.33.r),
-                ),
-              ),
-              child: Text(
-                'Continuer',
-                style: TextStyle(
-                  fontSize: 0.034.sw,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+                    ),
+                    child: Text(
+                      'Continuer',
+                      style: TextStyle(
+                        fontSize: 0.034.sw,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
           ),
         ),
       );

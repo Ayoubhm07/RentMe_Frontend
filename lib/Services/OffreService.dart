@@ -18,7 +18,7 @@ class OffreService {
   DemandeService demandeService =DemandeService();
   UserService userService = UserService();
   Future<List<Offre>> getOffersByDemand(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByDemandId/$id'),
@@ -49,7 +49,7 @@ class OffreService {
 
 
   Future<List<Offre>> getOffersByUser(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByUserId/$userId'),
@@ -74,7 +74,7 @@ class OffreService {
   }
 
   Future<List<Offre>> getOffersByLocation(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByLocationId/$id'),
@@ -109,7 +109,7 @@ class OffreService {
     Demand demand = await demandeService.getDemandById(offer.demandId);
     int receiverId = demand.userId;
     User receiver = await userService.findUserById(receiverId);
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     print("User FCM Token: ${user.fcmToken}");
     try {
       final response = await http.post(
@@ -148,7 +148,7 @@ class OffreService {
 
 
   Future<List<Offre>> getOffersByUserIdAndStatus(int userId, String status) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByUserIdandStatus/$userId/$status'),
@@ -173,7 +173,7 @@ class OffreService {
   }
 
   Future<String> deleteOffer(int offerId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.delete(
         Uri.parse('$url/deleteOffer/$offerId'),
@@ -197,7 +197,7 @@ class OffreService {
   }
 
   Future<void> acceptOffer(int offerId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$offerId/accept'),

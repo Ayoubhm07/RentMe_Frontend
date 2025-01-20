@@ -28,10 +28,10 @@ class DonneeadresseController {
   }
 
   void save() {
-    sharedPrefService.saveUserData('Adresse', AdresseController.text);
-    sharedPrefService.saveUserData('Ville', VilleController.text);
-    sharedPrefService.saveUserData('CodePostal', postalCodeController.text);
-    sharedPrefService.saveUserData('Pays', PaysController.text);
+    sharedPrefService.saveStringToPrefs('Adresse', AdresseController.text);
+    sharedPrefService.saveStringToPrefs('Ville', VilleController.text);
+    sharedPrefService.saveStringToPrefs('CodePostal', postalCodeController.text);
+    sharedPrefService.saveStringToPrefs('Pays', PaysController.text);
   }
 }
 

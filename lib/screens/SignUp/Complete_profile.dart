@@ -62,9 +62,9 @@ class CompleteProfileController {
           }
         }
     }
-    sharedPrefService.saveUserData('specialities', specialities);
-    sharedPrefService.saveUserData('projets', images);
-    sharedPrefService.saveUserData('description', _controller.text);
+    sharedPrefService.saveStringToPrefs('specialities', specialities);
+    sharedPrefService.saveStringToPrefs('projets', images);
+    sharedPrefService.saveStringToPrefs('description', _controller.text);
   }
 }
 
@@ -91,7 +91,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
   Future<void> _loadSpecialities() async {
     final String response = await rootBundle.loadString('assets/json/job.json');
     final List<dynamic> data = json.decode(response);
-    String currentRole = await widget.controller.sharedPrefService.readUserData('newRole');
+    String currentRole = await widget.controller.sharedPrefService.readStringFromPrefs('newRole');
     setState(() {
       isAmateur = currentRole == 'amateur';
       _specialities = List<String>.from(data);

@@ -4,48 +4,91 @@ import 'package:country_picker/country_picker.dart'; // Make sure you've added t
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Services/SharedPrefService.dart';
+import '../../entities/User.dart';
 import '../../theme/AppTheme.dart';
 
-class PhoneInput extends StatefulWidget {
-  @override
-  _PhoneInputState createState() => _PhoneInputState();
-}
 
-class _PhoneInputState extends State<PhoneInput> {
+class PhoneInputController{
+  final TextEditingController _phoneController = TextEditingController();
+  final SharedPrefService sharedPrefService = SharedPrefService();
   String selectedCountryCode = '+1';
   String selectedCountryFlag = '🇺🇸';
-  final TextEditingController _phoneController = TextEditingController();
-  late SharedPrefService sharedPrefService;
+
+  Future<Map<String, dynamic>> validate() async {
+    String errorMessage = '';
+    Map<String, dynamic> result = {};
+
+    Map<String, Map<String, int>> countryPhoneLengths = {
+      '+1': {'min': 10, 'max': 10}, // Example for US
+      '+33': {'min': 9, 'max': 9},  // Example for France
+      '+216': {'min': 8, 'max': 8},  // Example for Tunisia
+      // Add other countries here
+    };
+    if (_phoneController.text.isEmpty) {
+      errorMessage = 'Veuillez entrer votre numéro de téléphone';
+      result = {'error': true, 'message': errorMessage};
+      return result;
+    } else if (_phoneController.text.length < countryPhoneLengths[selectedCountryCode]!['min']! ||
+        _phoneController.text.length > countryPhoneLengths[selectedCountryCode]!['max']!) {
+      errorMessage = 'Veuillez entrer un numéro de téléphone valide';
+      result = {'error': true, 'message': errorMessage};
+      return result;
+
+    }
+    // verify its all numbers
+    else if(!RegExp(r'^[0-9]*$').hasMatch(_phoneController.text)){
+      errorMessage = 'Veuillez entrer un numéro de téléphone valide';
+      result = {'error': true, 'message': errorMessage};
+      return result;
+    }
+
+    await save();
+    return result;
+  }
+  Future <void> save() async {
+    User user = await sharedPrefService.getUser();
+    user.numTel = selectedCountryCode + _phoneController.text ;
+    await sharedPrefService.saveUser(user);
+    await sharedPrefService.saveStringToPrefs('flag',  selectedCountryFlag);
+    await sharedPrefService.saveStringToPrefs('code',  selectedCountryCode);
+    await sharedPrefService.saveStringToPrefs('phone', _phoneController.text);
+    print(" 4 - user after adding phone number : ");
+    await sharedPrefService.checkAllValues();
+  }
+}
+
+class PhoneInput extends StatefulWidget {
+  final PhoneInputController controller;
+  const PhoneInput({super.key, required this.controller});
+
+  @override
+  PhoneInputState createState() => PhoneInputState();
+}
+
+class PhoneInputState extends State<PhoneInput> {
+
+  final SharedPrefService sharedPrefService = SharedPrefService();
 
 
   @override
   void initState() {
     super.initState();
-    this.sharedPrefService = SharedPrefService();
     loadUserData();
   }
 
   void loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      selectedCountryCode = prefs.getString('code') ?? '+1';
-      selectedCountryFlag = prefs.getString('flag') ?? '🇺🇸';
-      _phoneController.text = prefs.getString('phone') ?? '';
+      widget.controller.selectedCountryCode = prefs.getString('code') ?? '+1';
+      widget.controller.selectedCountryFlag = prefs.getString('flag') ?? '🇺🇸';
+      widget.controller._phoneController.text = prefs.getString('phone') ?? '';
     });
     }
 
 
   @override
   void dispose() {
-    save();
     super.dispose();
-  }
-
-  void save() async {
-    await sharedPrefService.saveUserData('numTel', selectedCountryCode + _phoneController.text);
-    await sharedPrefService.saveUserData('flag', selectedCountryFlag);
-    await sharedPrefService.saveUserData('code', selectedCountryCode);
-    await sharedPrefService.saveUserData('phone', _phoneController.text);
   }
 
   @override
@@ -106,8 +149,8 @@ class _PhoneInputState extends State<PhoneInput> {
                         showPhoneCode: true,
                         onSelect: (Country country) {
                           setState(() {
-                            selectedCountryCode = '+${country.phoneCode}';
-                            selectedCountryFlag = country.flagEmoji;
+                            widget.controller.selectedCountryCode = '+${country.phoneCode}';
+                            widget.controller.selectedCountryFlag = country.flagEmoji;
                           });
                         },
                       );
@@ -120,9 +163,9 @@ class _PhoneInputState extends State<PhoneInput> {
                       ),
                       child: Row(
                         children: [
-                          Text(selectedCountryFlag, style: TextStyle(fontSize: 24.sp)),
+                          Text( widget.controller.selectedCountryFlag, style: TextStyle(fontSize: 24.sp)),
                           SizedBox(width: 8.w),
-                          Text(selectedCountryCode, style: TextStyle(fontSize: 16.sp)),
+                          Text( widget.controller.selectedCountryCode, style: TextStyle(fontSize: 16.sp)),
                           Icon(Icons.arrow_drop_down),
                         ],
                       ),
@@ -158,7 +201,7 @@ class _PhoneInputState extends State<PhoneInput> {
         ],
       ),
       child: TextField(
-        controller: _phoneController,
+        controller: widget.controller._phoneController,
         decoration: InputDecoration(
           hintText: textFieldData['hint'],
           contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),

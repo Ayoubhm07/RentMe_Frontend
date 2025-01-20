@@ -30,8 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   NotificationService notificationService = NotificationService();
    User? currentUser;
    ProfileDetails? profileDetails;
-  Future<void> SaveFcmToken() async
-  {
+
+
+  Future<void> saveFcmToken() async {
     User user = await sharedPrefService.getUser();
     String token = await getToken();
     user.fcmToken = token ;
@@ -61,9 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       print('User declined or has not accepted permission');
     }
   }
-   
-  Future<void> getCurrentUser() async
-  {
+  Future<void> getCurrentUser() async {
     User user = await sharedPrefService.getUser();
     _initializeZEGOVideo(user);
     currentUser = user ;
@@ -71,12 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   Future<void> getProfileDetails() async {
     ProfileDetails profileDetails = await profileService.getProfileDetails(currentUser!.id!);
-    // name and file name are in one variable separated by _
-    // so we need to split them
     List<String> nameAndFileName = profileDetails.profilePicture!.split("_");
     String profileImageInAppPath = await minIOService.LoadFileFromServer(nameAndFileName[0], nameAndFileName[1]);
     profileDetails.profilePicture = profileImageInAppPath;
-    // set the edited profile details in shared prefs
     await sharedPrefService.saveProfileDetails(profileDetails);
     sharedPrefService.checkAllValues();
   }
@@ -90,14 +86,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
   }
+
   @override
   void initState() {
     super.initState();
     requestNotificationPermissions();
     FirebaseMessaging.instance.requestPermission();
     getCurrentUser();
-    SaveFcmToken();
-
+    saveFcmToken();
   }
 
   Future<String> getToken()async{

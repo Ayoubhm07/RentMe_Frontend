@@ -10,7 +10,7 @@ class LocationService {
   SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<Location> saveLocation(Location location) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.post(
         Uri.parse('$url/create'),
@@ -38,7 +38,7 @@ class LocationService {
   }
 
   Future<List<Location>> getLocationsByNotUserId(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/not-user/$userId'),
@@ -61,7 +61,7 @@ class LocationService {
 
 
   Future<List<Location>> getMyLocationOffers(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/myLocations/$userId'),
@@ -83,7 +83,7 @@ class LocationService {
   }
 
   Future<Location> updateLocationStatus(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$id/status'),

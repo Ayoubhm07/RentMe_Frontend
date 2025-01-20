@@ -178,33 +178,33 @@ class ProfileStepperState extends State<ProfileStepper> {
     int? userId = user.id;
     ProfileDetails profileDetails = ProfileDetails(
       profilePicture: ProfilePicturefile,
-      description: await sharedPrefService.readUserData('description') ?? '',
-      specialite: await sharedPrefService.readUserData('specialities') ?? '',
+      description: await sharedPrefService.readStringFromPrefs('description') ?? '',
+      specialite: await sharedPrefService.readStringFromPrefs('specialities') ?? '',
       projets: projetsfiles,
       diplome: Diplomefile,
       formations: formationsfiles,
-      rue: await sharedPrefService.readUserData('Adresse') ?? '',
-      ville: await sharedPrefService.readUserData('Ville') ?? '',
-      codePostal: await sharedPrefService.readUserData('CodePostal') ?? '',
-      pays: await sharedPrefService.readUserData('Pays') ?? '',
-      titre: await sharedPrefService.readUserData('titre') ?? '',
-      nomSocieteExp: await sharedPrefService.readUserData('nomSocieteExp') ?? '',
-      dateDebut: await sharedPrefService.readUserData('startDateExp') ?? '',
-      dateFin: await sharedPrefService.readUserData('endDateExp') ?? '',
-      descriptionExp: await sharedPrefService.readUserData('descriptionExp') ?? '',
+      rue: await sharedPrefService.readStringFromPrefs('Adresse') ?? '',
+      ville: await sharedPrefService.readStringFromPrefs('Ville') ?? '',
+      codePostal: await sharedPrefService.readStringFromPrefs('CodePostal') ?? '',
+      pays: await sharedPrefService.readStringFromPrefs('Pays') ?? '',
+      titre: await sharedPrefService.readStringFromPrefs('titre') ?? '',
+      nomSocieteExp: await sharedPrefService.readStringFromPrefs('nomSocieteExp') ?? '',
+      dateDebut: await sharedPrefService.readStringFromPrefs('startDateExp') ?? '',
+      dateFin: await sharedPrefService.readStringFromPrefs('endDateExp') ?? '',
+      descriptionExp: await sharedPrefService.readStringFromPrefs('descriptionExp') ?? '',
       userId: userId!,
     );
-    await sharedPrefService.clearUserData('description');
-    await sharedPrefService.clearUserData('specialities');
-    await sharedPrefService.clearUserData('Adresse');
-    await sharedPrefService.clearUserData('Ville');
-    await sharedPrefService.clearUserData('CodePostal');
-    await sharedPrefService.clearUserData('Pays');
-    await sharedPrefService.clearUserData('titre');
-    await sharedPrefService.clearUserData('nomSocieteExp');
-    await sharedPrefService.clearUserData('startDateExp');
-    await sharedPrefService.clearUserData('endDateExp');
-    await sharedPrefService.clearUserData('descriptionExp');
+    await sharedPrefService.clearStringFromPrefs('description');
+    await sharedPrefService.clearStringFromPrefs('specialities');
+    await sharedPrefService.clearStringFromPrefs('Adresse');
+    await sharedPrefService.clearStringFromPrefs('Ville');
+    await sharedPrefService.clearStringFromPrefs('CodePostal');
+    await sharedPrefService.clearStringFromPrefs('Pays');
+    await sharedPrefService.clearStringFromPrefs('titre');
+    await sharedPrefService.clearStringFromPrefs('nomSocieteExp');
+    await sharedPrefService.clearStringFromPrefs('startDateExp');
+    await sharedPrefService.clearStringFromPrefs('endDateExp');
+    await sharedPrefService.clearStringFromPrefs('descriptionExp');
 
     bool finished = await profileService.saveProfileDetails(profileDetails);
     return finished;
@@ -215,45 +215,45 @@ class ProfileStepperState extends State<ProfileStepper> {
     int? userId = user.id;
     ProfileDetails profileDetails = ProfileDetails(
       profilePicture: ProfilePicturefile,
-      description: await sharedPrefService.readUserData('description') ?? '',
-      specialite: await sharedPrefService.readUserData('specialities') ?? '',
+      description: await sharedPrefService.readStringFromPrefs('description') ?? '',
+      specialite: await sharedPrefService.readStringFromPrefs('specialities') ?? '',
       certifications: projetsfiles,
       diplome: Diplomefile,
       formations: formationsfiles,
-      rue: await sharedPrefService.readUserData('Adresse') ?? '',
-      ville: await sharedPrefService.readUserData('Ville') ?? '',
-      codePostal: await sharedPrefService.readUserData('CodePostal') ?? '',
-      pays: await sharedPrefService.readUserData('Pays') ?? '',
-      titre: await sharedPrefService.readUserData('titre') ?? '',
-      nomSocieteExp: await sharedPrefService.readUserData('nomSocieteExp') ?? '',
-      dateDebut: await sharedPrefService.readUserData('startDateExp') ?? '',
-      dateFin: await sharedPrefService.readUserData('endDateExp') ?? '',
-      descriptionExp: await sharedPrefService.readUserData('descriptionExp') ?? '',
+      rue: await sharedPrefService.readStringFromPrefs('Adresse') ?? '',
+      ville: await sharedPrefService.readStringFromPrefs('Ville') ?? '',
+      codePostal: await sharedPrefService.readStringFromPrefs('CodePostal') ?? '',
+      pays: await sharedPrefService.readStringFromPrefs('Pays') ?? '',
+      titre: await sharedPrefService.readStringFromPrefs('titre') ?? '',
+      nomSocieteExp: await sharedPrefService.readStringFromPrefs('nomSocieteExp') ?? '',
+      dateDebut: await sharedPrefService.readStringFromPrefs('startDateExp') ?? '',
+      dateFin: await sharedPrefService.readStringFromPrefs('endDateExp') ?? '',
+      descriptionExp: await sharedPrefService.readStringFromPrefs('descriptionExp') ?? '',
       kbis: Kbisfile,
       labelQualite: qualiteFile,
       assurance: assuranceFile,
-      nomSociete: await sharedPrefService.readUserData('nomSociete') ?? '',
-      domaine: await sharedPrefService.readUserData('DomaineActivite') ?? '',
-      ancienClients: await sharedPrefService.readUserData('AncientClients') ?? '',
-      nombreSalaries: int.parse(await sharedPrefService.readUserData('NombreSalaries') ?? '0'),
+      nomSociete: await sharedPrefService.readStringFromPrefs('nomSociete') ?? '',
+      domaine: await sharedPrefService.readStringFromPrefs('DomaineActivite') ?? '',
+      ancienClients: await sharedPrefService.readStringFromPrefs('AncientClients') ?? '',
+      nombreSalaries: int.parse(await sharedPrefService.readStringFromPrefs('NombreSalaries') ?? '0'),
       userId: userId!,
     );
 
-    await sharedPrefService.clearUserData('description');
-    await sharedPrefService.clearUserData('specialities');
-    await sharedPrefService.clearUserData('Adresse');
-    await sharedPrefService.clearUserData('Ville');
-    await sharedPrefService.clearUserData('CodePostal');
-    await sharedPrefService.clearUserData('Pays');
-    await sharedPrefService.clearUserData('titre');
-    await sharedPrefService.clearUserData('nomSocieteExp');
-    await sharedPrefService.clearUserData('startDateExp');
-    await sharedPrefService.clearUserData('endDateExp');
-    await sharedPrefService.clearUserData('descriptionExp');
-    await sharedPrefService.clearUserData('nomSociete');
-    await sharedPrefService.clearUserData('DomaineActivite');
-    await sharedPrefService.clearUserData('AncientClients');
-    await sharedPrefService.clearUserData('NombreSalaries');
+    await sharedPrefService.clearStringFromPrefs('description');
+    await sharedPrefService.clearStringFromPrefs('specialities');
+    await sharedPrefService.clearStringFromPrefs('Adresse');
+    await sharedPrefService.clearStringFromPrefs('Ville');
+    await sharedPrefService.clearStringFromPrefs('CodePostal');
+    await sharedPrefService.clearStringFromPrefs('Pays');
+    await sharedPrefService.clearStringFromPrefs('titre');
+    await sharedPrefService.clearStringFromPrefs('nomSocieteExp');
+    await sharedPrefService.clearStringFromPrefs('startDateExp');
+    await sharedPrefService.clearStringFromPrefs('endDateExp');
+    await sharedPrefService.clearStringFromPrefs('descriptionExp');
+    await sharedPrefService.clearStringFromPrefs('nomSociete');
+    await sharedPrefService.clearStringFromPrefs('DomaineActivite');
+    await sharedPrefService.clearStringFromPrefs('AncientClients');
+    await sharedPrefService.clearStringFromPrefs('NombreSalaries');
 
     bool finished = await profileService.saveProfileDetails(profileDetails);
     return finished;
@@ -290,7 +290,7 @@ class ProfileStepperState extends State<ProfileStepper> {
     bool finished = false ;
     User? user = await sharedPrefService.getUser();
     user.isProfileCompleted = true;
-    String newRole = await sharedPrefService.readUserData('newRole');
+    String newRole = await sharedPrefService.readStringFromPrefs('newRole');
     user.roles = newRole;
     finished = await us.updateUser(user);
     return finished;
@@ -518,7 +518,7 @@ class ProfileStepperState extends State<ProfileStepper> {
                   this.validationErrors = _validateStep(currentStep);
                   if (this.validationErrors.isEmpty) {
                     donneeProfileController.save();
-                    sharedPrefService.readUserData('role').then((value) {
+                    sharedPrefService.readStringFromPrefs('role').then((value) {
                       role = value;
                       if (role == "amateur") {
                         totalSteps = 5;
