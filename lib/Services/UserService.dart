@@ -128,6 +128,45 @@ class UserService {
       return 'Error: $e';
     }
   }
+  Future<String> resetVerificationCode(String email) async {
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/reset/sendVerificationCode/$email'));
+      if (response.statusCode == 200) {
+        return 'Code sent successfully';
+      } else {
+        throw Exception('Failed to resend verification code: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+  Future<String> resetVerifyEmail(String email , int code ) async {
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/reset/verifyEmail/$email/$code'));
+      if (response.statusCode == 200) {
+        return 'Code verified';
+      } else {
+        throw Exception('Failed to verify code: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+  Future<String> resetPassword(String email , int code , String newPassword ) async {
+    try {
+      final response = await http.post(Uri.parse('$apiUrl/reset/resetPassword/$email/$code'),
+        headers: {'Content-Type': 'application/json'},
+        body: newPassword,
+      );
+      if (response.statusCode == 200) {
+        return 'Password reset successfully';
+      } else {
+        throw Exception('Failed to reset password: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
   Future<String> sendSMS(String email) async {
     String token = await sharedPrefService.readStringFromPrefs('accessToken');
 
