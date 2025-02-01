@@ -8,8 +8,8 @@ import '../../theme/AppTheme.dart';
 
 class FormSociete2Controller{
   SharedPrefService sharedPrefService = SharedPrefService();
-   TextEditingController ancientClientsController = TextEditingController();
-   TextEditingController nombreSalariesController = TextEditingController();
+  TextEditingController ancientClientsController = TextEditingController();
+  TextEditingController nombreSalariesController = TextEditingController();
 
 
   Map<String, dynamic> validate()
@@ -26,8 +26,8 @@ class FormSociete2Controller{
   }
   void save()
   {
-    sharedPrefService.saveUserData('AncientClients', ancientClientsController.text);
-    sharedPrefService.saveUserData('NombreSalaries', nombreSalariesController.text);
+    sharedPrefService.saveStringToPrefs('AncientClients', ancientClientsController.text);
+    sharedPrefService.saveStringToPrefs('NombreSalaries', nombreSalariesController.text);
   }
 }
 class FormSociete2 extends StatefulWidget {

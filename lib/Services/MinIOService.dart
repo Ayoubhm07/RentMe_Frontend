@@ -15,8 +15,7 @@ class MinIOService {
 
   Future<String> saveFileToServer(String bucketName, File file) async {
     var request = http.MultipartRequest('POST', Uri.parse('$apiUrl/upload'));
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    Map<String, dynamic> payload = jwtService.getUsernameFromToken(accessToken);
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    Map<String, dynamic> payload = jwtService.getUsernameFromToken(accessToken);
     String username = jwtService.getUsernameFromToken(accessToken)['sub'];
     String objectName = '$username-${DateTime.now().millisecondsSinceEpoch}';
     request.fields['bucketName'] = bucketName;
@@ -37,8 +36,7 @@ class MinIOService {
   }
 
   Future<String> LoadFileFromServer(String bucketName, String objectName) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    var response = await http.get(
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    var response = await http.get(
       Uri.parse(
           '$apiUrl/download?bucketName=$bucketName&objectName=$objectName'),
       headers: {
@@ -50,7 +48,6 @@ class MinIOService {
       print('File downloaded successfully');
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String filePath = '${appDocDir.path}/$objectName';
-      // check if a file with the same name exists
       if (await File(filePath).exists()) {
          return filePath;
       }

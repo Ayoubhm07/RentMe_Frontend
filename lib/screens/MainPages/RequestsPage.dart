@@ -6,13 +6,13 @@ import 'package:khedma/Services/OffreService.dart';
 import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/Services/UserService.dart';
-import 'package:khedma/components/appBardemande.dart';
 import 'package:khedma/components/navbara.dart';
 import 'package:khedma/entities/User.dart';
 import 'package:khedma/screens/SideMenu.dart';
 import 'package:khedma/theme/AppTheme.dart';
 import '../../components/Card/ServiceCard.dart';
 import '../../components/Switch/CustomSwitch1.dart';
+import '../../components/appBar/appBar.dart';
 import '../../entities/Demand.dart';
 import '../../entities/Offre.dart';
 
@@ -85,11 +85,11 @@ class _MyRequestsPageState extends State<MyRequestsPage> {
               builder: (context) =>
                   MyDrawer(toggleDrawer: () => _toggleDrawer(context)),
             ),
-      appBar: CustomAppBard(
+      appBar: CustomAppBar(
         notificationIcon: Icon(Icons.location_on_outlined, color: Colors.white),
         title: 'Mes Demandes',
         showSearchBar: false,
-        backgroundColor: AppTheme.primaryColor, // AppBar with primary color
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: SingleChildScrollView(
         child: Column(

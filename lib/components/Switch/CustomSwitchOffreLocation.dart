@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:khedma/Services/OffreLocationService.dart';
 import 'package:khedma/components/Sections/AcceptedOffersSection.dart';
 import 'package:khedma/components/Sections/DoneOffersSection.dart';
 import 'package:khedma/components/Sections/PendingOffersSection.dart';
@@ -7,6 +8,10 @@ import 'package:khedma/components/Sections/RejectedOffersSection.dart';
 import '../../Services/OffreService.dart';
 import '../Card/CardOffre.dart';
 import '../Card/CardOffreEnCours.dart';
+import '../Sections/AcceptedLocationOffersSection.dart';
+import '../Sections/DoneLocationOffersSection.dart';
+import '../Sections/PendingLocationOffersSection.dart';
+import '../Sections/RejectedLocationOffersSection.dart';
 
 class CustomSwitchOffreLocation extends StatefulWidget {
   final List<String> buttonLabels;
@@ -18,13 +23,14 @@ class CustomSwitchOffreLocation extends StatefulWidget {
 }
 
 class _CustomSwitchOffreLocationState extends State<CustomSwitchOffreLocation> {
-  final OffreService offreService = OffreService();
+  final OffreLocationService offreService = OffreLocationService();
   late List<bool> isSelected;
+  final OffreService offreServicee = OffreService();
+
 
   @override
   void initState() {
     super.initState();
-    // Initialise isSelected avec la longueur de buttonLabels
     isSelected = List.generate(widget.buttonLabels.length, (index) => index == 0);
   }
 
@@ -89,13 +95,13 @@ class _CustomSwitchOffreLocationState extends State<CustomSwitchOffreLocation> {
 
   Widget _buildContent() {
     if (isSelected[0]) {
-      return AcceptedOffersSection(offreService: offreService);
+      return AcceptedLocationOffersSection(offreService: offreService);
     } else if (isSelected[1]) {
-      return DoneOffersSection(offreService: offreService);
+      return DoneLocationOffersSection(offreService: offreService);
     } else if (isSelected[2]) {
-      return PendingOffersSection(offreService: offreService);
+      return PendingLocationOffersSection(offreService: offreService);
     } else {
-      return RejectedOffersSection(offreService: offreService);
+      return RejectedLocationOffersSection(offreService: offreService);
     }
   }
 

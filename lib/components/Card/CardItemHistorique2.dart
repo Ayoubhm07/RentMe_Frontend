@@ -1,32 +1,40 @@
+import 'dart:core';
+import 'dart:core';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:khedma/Services/LocationService.dart';
+import 'package:khedma/Services/MinIOService.dart';
 import 'package:khedma/Services/OffreLocationService.dart';
 import 'package:khedma/Services/OffreService.dart';
 import 'package:khedma/Services/UserService.dart';
 import 'package:khedma/entities/OffreLocation.dart';
 
 import '../../entities/User.dart';
+import '../Sheets/ShowModifyLocationBottomSheet.dart';
+import 'ConfirmationNotficationCard.dart';
+import 'SuccessNotificationCard.dart';
 
 class RentalItemCardHistorique2 extends StatefulWidget {
   final String imageUrl;
   final String title;
-  final String description;
   final String category;
   final String price;
   final String location;
   final String ownerName;
   final int locationId;
   final String timeUnit;
+  final String userImage;
 
   const RentalItemCardHistorique2({
     Key? key,
+    required this.userImage,
     required this.imageUrl,
     required this.title,
     required this.category,
-    required this.description,
     required this.price,
     required this.location,
     required this.ownerName,
@@ -46,10 +54,77 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
   UserService userService = UserService();
   LocationService locationService= LocationService();
   OffreLocationService offreLocationService= OffreLocationService();
+  MinIOService minIOService = MinIOService();
+  String? userProfileImage;
   @override
   void initState() {
     super.initState();
     _loadOffers();
+    _fetchUserProfileImage();
+  }
+
+
+  void _handleCancelPressed(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ConfirmationDialog(
+          message: 'Êtes-vous sûr de vouloir supprimer cette demande de location ?',
+          logoPath: 'assets/images/logo.png',
+          onConfirm: () async {
+            Navigator.of(context).pop(); // Close the dialog first
+            try {
+              await LocationService().deleteLocation(widget.locationId);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Votre demande de location a été supprimée',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              });
+            } catch (error) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors de la suppression de votre demande de location!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Simply close the dialog on cancel
+          },
+        );
+      },
+    );
+  }
+
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      String objectName = widget.userImage.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userProfileImage = filePath;
+      });
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
   }
 
   Future<void> _loadOffers() async {
@@ -71,68 +146,113 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
   }
 
   Future<void> _acceptOffer(int offerId) async {
-    bool confirm = await _showConfirmationDialog('Voulez-vous accepter cette offre ?');
-    if (confirm) {
-      try {
-        await locationService.updateLocationStatus(widget.locationId);
-        await offreLocationService.acceptOffer(offerId);
-        print('Offer accepted and location status updated');
-        await _loadOffers();
-      } catch (e) {
-        print('Error accepting offer: $e');
-      }
-    }
-  }
-
-  Future<void> _rejectOffer(int offerId) async {
-    bool confirm = await _showConfirmationDialog('Voulez-vous rejeter cette offre ?');
-    if (confirm) {
-      try {
-        await offreLocationService.rejectOffer(offerId);
-        print('Offer rejected');
-        await _loadOffers();
-      } catch (e) {
-        print('Error rejecting offer: $e');
-      }
-    }
-  }
-
-  Future<bool> _showConfirmationDialog(String message) async {
-    bool? result = await showDialog<bool>(
+    showDialog(
       context: context,
-      barrierDismissible: false, // L'utilisateur doit appuyer sur un bouton pour fermer le dialogue.
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmation', style: TextStyle(color: Colors.black)),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message, style: TextStyle(fontSize: 16)),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Non', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop(false); // retourne false
-              },
-            ),
-            TextButton(
-              child: Text('Oui', style: TextStyle(color: Colors.green)),
-              onPressed: () {
-                Navigator.of(context).pop(true); // retourne true
-              },
-            ),
-          ],
+        return ConfirmationDialog(
+          message: 'Voulez-vous accepter cette offre ?',
+          logoPath: 'assets/images/logo.png', // Replace with your actual logo path
+          onConfirm: () async {
+            Navigator.of(context).pop(); // Close the ConfirmationDialog
+            try {
+              await locationService.updateLocationStatus(widget.locationId);
+              await offreLocationService.acceptOffer(offerId);
+              print('Offer accepted and location status updated');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Offre acceptée avec succès!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop(); // Close SuccessDialog
+                Navigator.of(context).pop(); // Close ErrorDialog
+                Navigator.of(context).pop(); // Close ErrorDialog
+              });
+            } catch (e) {
+              print('Error accepting offer: $e');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors de l\'acceptation de l\'offre: $e',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop();
+                // Close ErrorDialog
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
         );
       },
     );
-    return result ?? false; // Retourne false si result est null
   }
 
 
-
+  Future<void> _rejectOffer(int offerId) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ConfirmationDialog(
+          message: 'Voulez-vous rejeter cette offre ?',
+          logoPath: 'assets/images/logo.png', // Replace with your actual logo path
+          onConfirm: () async {
+            Navigator.of(context).pop(); // Close the ConfirmationDialog
+            try {
+              await offreLocationService.rejectOffer(offerId);
+              print('Offer rejected');
+              await _loadOffers();
+              // Optionally show success feedback
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Offre rejetée avec succès!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop(); // Close SuccessDialog
+                Navigator.of(context).pop(); // Close SuccessDialog
+              });
+            } catch (e) {
+              print('Error rejecting offer: $e');
+              // Optionally show error feedback
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors du rejet de l\'offre: $e',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop(); // Close ErrorDialog
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Close the ConfirmationDialog
+          },
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -160,52 +280,57 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
                     fit: BoxFit.cover,
                   ),
                 ),
-
-
-
                 SizedBox(height: 10.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Section texte
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Titre de la demande
                           Text(
                             widget.title,
                             style: GoogleFonts.roboto(
-                              fontSize: 14.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
                           SizedBox(height: 8.h),
-                          Text(
-                            widget.description,
-                            style: GoogleFonts.roboto(
-                              fontSize: 12.sp,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+
+                          // Emplacement
+                          Row(
+                            children: [
+                              Icon(Icons.book_online_outlined, color: Colors.blue, size: 20.sp),
+                              SizedBox(width: 5.w),
+                              Expanded(
+                                child: Text(
+                                  widget.location,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 12.sp,
+                                    color: Colors.black,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                           SizedBox(height: 8.h),
-                          Text(
-                            widget.category,
-                            style: GoogleFonts.roboto(
-                              fontSize: 12.sp,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
+
+                          // Prix
                           Row(
                             children: [
                               Image.asset("assets/icons/tokenicon.png", width: 20),
                               SizedBox(width: 4.w),
                               Text(
-                                widget.price ,
+                                widget.price,
                                 style: GoogleFonts.roboto(
                                   fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black,
                                 ),
                               ),
                             ],
@@ -214,13 +339,37 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
                         ],
                       ),
                     ),
+
+                    // Actions : Modifier et Supprimer
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.orange, size: 24.sp),
+                          tooltip: "Modifier la demande",
+                          onPressed: () {
+                            showModifyLocationBottomSheet(context, widget.locationId);
+                            print("Modifier la demande : ${widget.title}");
+                          },
+                        ),
+
+                        SizedBox(width: 8.w),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red, size: 24.sp),
+                          tooltip: "Supprimer la demande",
+                          onPressed: () => _handleCancelPressed(context),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
+
                 Row(
                   children: [
                     CircleAvatar(
                       radius: 18.r,
-                      backgroundImage: AssetImage("assets/images/img_6.png"),
+                      backgroundImage: userProfileImage != null
+                          ? FileImage(File(userProfileImage!))
+                          : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
@@ -236,9 +385,18 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
                   ],
                 ),
                 ExpansionTile(
-                  title: Text(
-                    "Offres",
-                    style: GoogleFonts.roboto(fontWeight: FontWeight.bold, color: themeData.primaryColor),
+                  title: Row(
+                    children: [
+                      SizedBox(width: 8),
+                      Text(
+                        "Liste des offres de locations",
+                        style: GoogleFonts.roboto(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                   initiallyExpanded: _isExpanded,
                   onExpansionChanged: (bool expanded) {
@@ -248,116 +406,130 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
                   },
                   iconColor: themeData.primaryColor,
                   collapsedIconColor: Colors.grey,
-                  backgroundColor: Colors.white.withOpacity(0.9),
-                  childrenPadding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 1.0),
-                  children: _offers.map((offer) => ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: <Widget>[
-                            Icon(Icons.euro_symbol, size: 18, color: themeData.primaryColor),
-                            SizedBox(width: 4,),
-                            Text(
-                              "Prix: ",
-                              style: GoogleFonts.roboto(fontWeight: FontWeight.bold, color: Colors.black),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${offer.price}€",
-                                style: GoogleFonts.roboto(color: Colors.grey[600]),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: <Widget>[
-                            Icon(Icons.date_range, size: 18, color: themeData.primaryColor),
-                            SizedBox(width: 4),
-                            Text(
-                              "Période: ",
-                              style: GoogleFonts.roboto(fontWeight: FontWeight.bold, color: Colors.black),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${offer.periode}",
-                                style: GoogleFonts.roboto(color: Colors.grey[600]),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: <Widget>[
-                            Icon(Icons.person_outline, size: 18, color: themeData.primaryColor),
-                            SizedBox(width: 4),
-                            Text(
-                              "Posté par: ",
-                              style: GoogleFonts.roboto(fontWeight: FontWeight.bold, color: Colors.black),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${_userNames[offer.userId] ?? 'Inconnu'}",
-                                style: GoogleFonts.roboto(color: Colors.grey[600]),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: <Widget>[
-                            Icon(Icons.pending_actions, size: 18, color: themeData.primaryColor),
-                            SizedBox(width: 4),
-                            Text(
-                              "Statut: ",
-                              style: GoogleFonts.roboto(fontWeight: FontWeight.bold, color: Colors.black),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "Offre en attente",
-                                style: GoogleFonts.roboto(color: Colors.grey[600]),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          // mainAxisSize: MainAxisSize.min,
+                  backgroundColor: Colors.white,
+                  collapsedBackgroundColor: Colors.grey[200],
+                  childrenPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  children: _offers.map((offer) {
+                    return Card(
+                      margin: EdgeInsets.symmetric(vertical: 8.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.check_circle_outline, color: Colors.green[800]),
-                              onPressed: () => _acceptOffer(offer.id ?? 0),
-                              tooltip: 'Accepter',
+                            _buildOfferRow(
+                              icon: Icons.euro_symbol,
+                              label: "Prix:",
+                              value: "${offer.price} jetons",
+                              themeColor: themeData.primaryColor,
                             ),
-                            IconButton(
-                              icon: Icon(Icons.cancel_outlined, color: Colors.red[800]),
-                              onPressed: () => _rejectOffer(offer.id ?? 0),
-                              tooltip: 'Rejeter',
+                            SizedBox(height: 8),
+                            _buildOfferRow(
+                              icon: Icons.date_range,
+                              label: "Période:",
+                              value: "${offer.periode}",
+                              themeColor: themeData.primaryColor,
                             ),
-                            IconButton(
-                              icon: Icon(Icons.chat_bubble_outline, color: themeData.primaryColor),
-                              onPressed: () {
-                                // Logic to contact the offer poster
-                              },
-                              tooltip: 'Contactez le postulant',
+                            SizedBox(height: 8),
+                            _buildOfferRow(
+                              icon: Icons.person_outline,
+                              label: "Posté par:",
+                              value: "${_userNames[offer.userId] ?? 'Inconnu'}",
+                              themeColor: themeData.primaryColor,
+                            ),
+                            SizedBox(height: 8),
+                            _buildOfferRow(
+                              icon: Icons.pending_actions,
+                              label: "Statut:",
+                              value: "Offre en attente",
+                              themeColor: themeData.primaryColor,
+                            ),
+                            Divider(color: Colors.grey[300], thickness: 1.0, height: 16.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildActionIcon(
+                                  icon: Icons.check_circle_outline,
+                                  color: Colors.green,
+                                  tooltip: 'Accepter',
+                                  onPressed: () => _acceptOffer(offer.id ?? 0),
+                                ),
+                                _buildActionIcon(
+                                  icon: Icons.cancel_outlined,
+                                  color: Colors.red,
+                                  tooltip: 'Rejeter',
+                                  onPressed: () => _rejectOffer(offer.id ?? 0),
+                                ),
+                                _buildActionIcon(
+                                  icon: Icons.chat_bubble_outline,
+                                  color: Colors.blue,
+                                  tooltip: 'Contactez le postulant',
+                                  onPressed: () {
+                                    // Logic to contact the offer poster
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-
-                  )).toList(),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+  Widget _buildOfferRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color themeColor,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: themeColor),
+        SizedBox(width: 8),
+        Text(
+          label,
+          style: GoogleFonts.roboto(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Colors.black,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.roboto(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionIcon({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      icon: Icon(icon, color: color, size: 24),
+      tooltip: tooltip,
+      onPressed: onPressed,
     );
   }
 }

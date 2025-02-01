@@ -4,7 +4,7 @@ import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/Services/TransactionService.dart';
 import '../../entities/Demand.dart';
 import '../../entities/User.dart';
-import '../../screens/MainPages/HomePage.dart';
+import '../../screens/MainPages/Home/HomePage.dart';
 
 class ConfirmPaymentWidget extends StatefulWidget {
   final int amount;

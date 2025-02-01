@@ -2,23 +2,59 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:khedma/Services/DemandeService.dart';
+import 'package:khedma/Services/MinIOService.dart';
+import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/components/Card/AcceptedOfferCard.dart';
 import 'package:khedma/entities/Demand.dart';
 import 'package:khedma/entities/User.dart';
 import '../../Services/OffreService.dart';
 import '../../entities/Offre.dart';
+import '../../entities/ProfileDetails.dart';
 import '../Card/CardOffre.dart';
+import '../Card/ConfirmationNotficationCard.dart';
+import '../Card/SuccessNotificationCard.dart';
 
-class AcceptedOffersSection extends StatelessWidget {
+
+class AcceptedOffersSection extends StatefulWidget {
   final OffreService offreService;
+  AcceptedOffersSection({Key? key, required this.offreService}) : super(key: key);
+  @override
+  _AcceptedOffersSectionState createState() => _AcceptedOffersSectionState();
+}
+
+class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
   final DemandeService demandeService = DemandeService();
   final SharedPrefService sharedPrefService = SharedPrefService();
+  final ProfileService profileService = ProfileService();
+  final MinIOService minIOService = MinIOService();
+  String? userImage;
 
-  AcceptedOffersSection({Key? key, required this.offreService}) : super(key: key);
 
-  Future<List<Offre>> _fetchPendingOffers() {
-    return offreService.getOffersByUserIdAndStatus(6, 'accepted');
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfileImage();
+  }
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      User user = await sharedPrefService.getUser();
+      ProfileDetails profileDetails = await profileService.getProfileDetails(user.id ?? 0);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
+
+  Future<List<Offre>> _fetchPendingOffers() async {
+    User user = await sharedPrefService.getUser();
+    return widget.offreService.getOffersByUserIdAndStatus(user.id ?? 0, 'accepted');
   }
 
   Future<Demand?> _fetchDemand(int demandId) async {
@@ -86,6 +122,7 @@ class AcceptedOffersSection extends StatelessWidget {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return AcceptedOfferCard(
+                            userImage: userImage ?? "",
                             imageUrl: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),
@@ -96,50 +133,55 @@ class AcceptedOffersSection extends StatelessWidget {
                             duree: offre.periode,
                             budget: offre.price.toString()+"€",
                             onTerminerPressed: () {
+                              final parentContext = context; // Capture the parent context
+
                               showDialog(
-                                context: context,
+                                context: parentContext,
                                 builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Confirmation'),
-                                    content: Text('Vous voulez marquer cette offre comme terminée ?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () async {
-                                          Navigator.of(context).pop(); // Ferme la boîte de dialogue
-                                          offre.status = OfferStatus.done; // Assurez-vous que l'enum est correctement formaté
-                                          try {
-                                            offre.status = OfferStatus.done; // Assume OfferStatus.done est correct et accepté par le serveur
-                                            Offre updatedOffer = await offreService.createOffer(offre);
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Offre marquée comme terminée avec succès!'))
+                                  return ConfirmationDialog(
+                                    message: 'Vous voulez marquer cette offre comme terminée ?',
+                                    logoPath: 'assets/images/logo.png',
+                                    onConfirm: () async {
+                                      Navigator.of(context).pop(); // Close the ConfirmationDialog first
+                                      offre.status = OfferStatus.done;
+                                      try {
+                                        await widget.offreService.createOffer(offre);
+                                        // Display the SuccessDialog using the parent context
+                                        await Future.delayed(Duration(milliseconds: 100));
+                                        showDialog(
+                                          context: parentContext,
+                                          builder: (BuildContext context) {
+                                            return SuccessDialog(
+                                              message: 'Offre marquée comme terminée avec succès!',
+                                              logoPath: 'assets/images/logo.png',
+                                              iconPath: 'assets/icons/check1.png',
                                             );
-                                          } catch (e) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Erreur lors de la mise à jour de l\'offre: $e'))
+                                          },
+                                        );
+                                        // Close the SuccessDialog after a delay
+                                        await Future.delayed(Duration(seconds: 2));
+                                        Navigator.of(parentContext).pop();
+                                        Navigator.of(parentContext).pop();
+                                      } catch (e) {
+                                        // Display the ErrorDialog using the parent context
+                                        await Future.delayed(Duration(milliseconds: 100));
+                                        showDialog(
+                                          context: parentContext,
+                                          builder: (BuildContext context) {
+                                            return SuccessDialog(
+                                              message: 'Erreur lors de la mise à jour de l\'offre: $e',
+                                              logoPath: 'assets/images/logo.png',
+                                              iconPath: 'assets/icons/echec.png',
                                             );
-                                          }
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.check_circle, color: Colors.green),
-                                            SizedBox(width: 8),
-                                            Text('Oui', style: TextStyle(color: Colors.green)),
-                                          ],
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.cancel, color: Colors.grey),
-                                            SizedBox(width: 8),
-                                            Text('Non', style: TextStyle(color: Colors.grey)),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                          },
+                                        );
+                                        await Future.delayed(Duration(seconds: 2));
+                                        Navigator.of(parentContext).pop(); // Close the ErrorDialog
+                                      }
+                                    },
+                                    onCancel: () {
+                                      Navigator.of(context).pop(); // Close the ConfirmationDialog
+                                    },
                                   );
                                 },
                               );

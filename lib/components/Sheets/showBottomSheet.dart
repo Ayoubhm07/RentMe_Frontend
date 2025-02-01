@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/Services/DemandeService.dart';
 
 import '../../theme/AppTheme.dart';
+import '../Card/SuccessNotificationCard.dart';
 
 void showEditBottomSheet(BuildContext context, {required int idDemand}) {
   showModalBottomSheet(
@@ -16,13 +17,12 @@ void showEditBottomSheet(BuildContext context, {required int idDemand}) {
     builder: (BuildContext context) {
       final TextEditingController priceController = TextEditingController();
       final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
       return Padding(
         padding: EdgeInsets.only(
           top: 16.h,
           left: 16.w,
           right: 16.w,
-          bottom: bottomInset + 16.h, // Ajustement pour le clavier
+          bottom: bottomInset + 16.h,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -36,7 +36,7 @@ void showEditBottomSheet(BuildContext context, {required int idDemand}) {
                 Expanded(
                   child: Center(
                     child: Text(
-                      'Proposition de prix pour la demande #$idDemand',
+                      'Proposition de prix pour la demande',
                       style: GoogleFonts.roboto(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
@@ -49,7 +49,7 @@ void showEditBottomSheet(BuildContext context, {required int idDemand}) {
             ),
             SizedBox(height: 10.h),
             Text(
-              'Proposez une offre de prix afin de répondre à cette demande.',
+              'Proposez une offre de prix afin de mettre à jour cette demande.',
               style: GoogleFonts.roboto(
                 fontSize: 12.sp,
                 color: Colors.grey,
@@ -102,20 +102,37 @@ void showEditBottomSheet(BuildContext context, {required int idDemand}) {
                   try {
                     DemandeService demandService = DemandeService();
                     await demandService.updateDemandPrice(idDemand, price);
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Mise à jour du prix réussie"),
-                        backgroundColor: Colors.green,
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SuccessDialog(
+                          message: 'Votre Demande a été modifiée',
+                          logoPath: 'assets/images/logo.png',
+                          iconPath: 'assets/icons/check1.png',
+                        );
+                      },
                     );
+                    Future.delayed(Duration(seconds: 2), () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+
+                    });
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Erreur lors de la mise à jour du prix: $e"),
-                        backgroundColor: Colors.red,
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SuccessDialog(
+                          message: 'Erreur lors de la mise à jour de votre demande!',
+                          logoPath: 'assets/images/logo.png',
+                          iconPath: 'assets/icons/echec.png',
+                        );
+                      },
                     );
+                    Future.delayed(Duration(seconds: 2), () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    });
                   }
                 }
               },

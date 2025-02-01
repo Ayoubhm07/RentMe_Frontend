@@ -33,19 +33,19 @@ class FormExperienceController {
       result = {'error': true, 'message': errorMessage};
     }
     else if (desctiptionController.text.isEmpty)
-      {
-        errorMessage = 'Veuillez remplir tous les champs';
-        result = {'error': true, 'message': errorMessage};
-      }
+    {
+      errorMessage = 'Veuillez remplir tous les champs';
+      result = {'error': true, 'message': errorMessage};
+    }
     return result;
   }
 
   void save() {
-    sharedPrefService.saveUserData('titre', titreController.text);
-    sharedPrefService.saveUserData('nomSocieteExp', nomSocieteController.text);
-    sharedPrefService.saveUserData('descriptionExp', desctiptionController.text);
-    sharedPrefService.saveUserData('startDateExp', startDate.toString());
-    sharedPrefService.saveUserData('endDateExp', endDate.toString());
+    sharedPrefService.saveStringToPrefs('titre', titreController.text);
+    sharedPrefService.saveStringToPrefs('nomSocieteExp', nomSocieteController.text);
+    sharedPrefService.saveStringToPrefs('descriptionExp', desctiptionController.text);
+    sharedPrefService.saveStringToPrefs('startDateExp', startDate.toString());
+    sharedPrefService.saveStringToPrefs('endDateExp', endDate.toString());
   }
 }
 
@@ -239,11 +239,11 @@ class _FormExperienceState extends State<FormExperience> {
         decoration: InputDecoration(
           hintText: textFieldData['hint'],
           contentPadding:
-              EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           hintStyle: TextStyle(color: AppTheme.secondaryColor),
           border: UnderlineInputBorder(
             borderSide:
-                BorderSide(color: AppTheme.grisTextField), // Bordure blanche
+            BorderSide(color: AppTheme.grisTextField), // Bordure blanche
           ),
           enabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(

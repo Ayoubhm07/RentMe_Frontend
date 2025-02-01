@@ -10,8 +10,7 @@ class LocationService {
   SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<Location> saveLocation(Location location) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.post(
         Uri.parse('$url/create'),
         headers: {
@@ -37,9 +36,30 @@ class LocationService {
     }
   }
 
+  Future<Location> getLocationById(int id) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
+      final response = await http.get(
+        Uri.parse('$url/get/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Demande récupérée avec succès');
+        return Location.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Échec de la récupération de la demande de location: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
   Future<List<Location>> getLocationsByNotUserId(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(
         Uri.parse('$url/not-user/$userId'),
         headers: {
@@ -61,8 +81,7 @@ class LocationService {
 
 
   Future<List<Location>> getMyLocationOffers(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(
         Uri.parse('$url/myLocations/$userId'),
         headers: {
@@ -83,7 +102,7 @@ class LocationService {
   }
 
   Future<Location> updateLocationStatus(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$id/status'),
@@ -105,6 +124,51 @@ class LocationService {
       throw Exception('Erreur de connexion: $e');
     }
   }
+  Future<Location> updateLocationPriceTime(int id, double price, String timeUnit) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.patch(
+        Uri.parse('$url/$id/$price/$timeUnit'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
+      if (response.statusCode == 200) {
+        print('demande de location mise à jour avec succès');
+        return Location.fromJson(json.decode(response.body));
+      } else {
+        throw Exception(
+            'Échec de la mise à jour du prix de la demande: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+
+  Future<String> deleteLocation(int locationId) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
+      final response = await http.delete(
+        Uri.parse('$url/delete/$locationId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Location supprimée avec succès');
+        return "Location supprimée avec succès!";
+      } else {
+        throw Exception('Échec de la suppression de la location: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
 
 }

@@ -28,10 +28,10 @@ class DonneeadresseController {
   }
 
   void save() {
-    sharedPrefService.saveUserData('Adresse', AdresseController.text);
-    sharedPrefService.saveUserData('Ville', VilleController.text);
-    sharedPrefService.saveUserData('CodePostal', postalCodeController.text);
-    sharedPrefService.saveUserData('Pays', PaysController.text);
+    sharedPrefService.saveStringToPrefs('Adresse', AdresseController.text);
+    sharedPrefService.saveStringToPrefs('Ville', VilleController.text);
+    sharedPrefService.saveStringToPrefs('CodePostal', postalCodeController.text);
+    sharedPrefService.saveStringToPrefs('Pays', PaysController.text);
   }
 }
 
@@ -187,7 +187,7 @@ class _DonneeadresseState extends State<Donneeadresse> {
         decoration: InputDecoration(
           hintText: textFieldData['hint'],
           contentPadding:
-              EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           hintStyle: TextStyle(color: AppTheme.secondaryColor),
           border: UnderlineInputBorder(
             borderSide: BorderSide(color: AppTheme.grisTextField),

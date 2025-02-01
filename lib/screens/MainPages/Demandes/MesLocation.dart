@@ -44,7 +44,7 @@ class _OffreLocationScreenState extends State<OffreLocationScreen> {
           Expanded(
             child: Center(
               child: CustomSwitchOffreLocation(
-                buttonLabels: ['En cours', 'Terminées', 'En attente','Rejected'],
+                buttonLabels: ['Acceptées', 'Terminées', 'En attente','Rejected'],
               ),
             ),
           ),

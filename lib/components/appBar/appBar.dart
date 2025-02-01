@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../screens/MainPages/NotificationSpace.dart';
 import '../../theme/AppTheme.dart';
-import '../Switch/CustomSwitchRechereche.dart'; // Assuming this is your custom widget
+import '../Switch/CustomSwitchRechereche.dart';
+import '../../Services/NotificationService.dart';
+import '../../Services/SharedPrefService.dart';
+import '../../entities/User.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget notificationIcon;
   final String title;
   final bool showSearchBar;
@@ -15,20 +18,51 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.notificationIcon,
     required this.title,
     this.showSearchBar = false,
-    this.backgroundColor = Colors.blue,  // Default color set to blue
+    this.backgroundColor = Colors.blue,
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(showSearchBar ? 150.h : 90.h); // Adjust height based on search bar
+  Size get preferredSize => Size.fromHeight(showSearchBar ? 150.h : 90.h);
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  int unreadCount = 0;
+  late NotificationService notificationService;
+  late SharedPrefService sharedPrefService;
+
+  @override
+  void initState() {
+    super.initState();
+    notificationService = NotificationService();
+    sharedPrefService = SharedPrefService();
+    _fetchUnreadNotifications();
+  }
+
+  Future<void> _fetchUnreadNotifications() async {
+    try {
+      User? user = await sharedPrefService.getUser();
+      if (user != null) {
+        int count = await notificationService.getUnreadCount(user.id!);
+        setState(() {
+          unreadCount = count;
+          print("NOMBREEEEEEEES UNREAD:{$unreadCount}");
+        });
+      }
+    } catch (e) {
+      print('Error fetching unread notifications: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-
       borderRadius: BorderRadius.vertical(bottom: Radius.circular(30.h)),
       child: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -37,21 +71,41 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => NotificationScreen()),
-                );
+                ).then((_) => _fetchUnreadNotifications());
               },
-              child: Padding(
-                padding: EdgeInsets.only(left: 16.w), // Increase left padding
-                child: Icon(
-                  Icons.notifications, // Change to Icon widget if using a default icon
-                  size: 30.sp, // Increase icon size
-                  color: Colors.white,
-                ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w),
+                    child: widget.notificationIcon,
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: EdgeInsets.all(4.w),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '$unreadCount',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             Expanded(
               child: Center(
                 child: Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -67,21 +121,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         actions: [
           Builder(
             builder: (context) => IconButton(
-              icon: Icon(Icons.menu,color: Colors.white),
+              icon: Icon(Icons.menu, color: Colors.white),
               onPressed: () {
                 Scaffold.of(context).openEndDrawer();
               },
             ),
           ),
         ],
-        bottom: showSearchBar
+        bottom: widget.showSearchBar
             ? PreferredSize(
           preferredSize: Size.fromHeight(60.0),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 100.w, vertical: 25.h), // Adjust padding for smaller search bar
+            padding:
+            EdgeInsets.symmetric(horizontal: 100.w, vertical: 25.h),
             child: Container(
               height: 40.h,
-              width: 250.w, // Set a smaller width for the search bar
+              width: 250.w,
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Recherche',

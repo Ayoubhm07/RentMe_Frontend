@@ -14,9 +14,9 @@ import 'MainPages/Demandes/MesOffre.dart';
 import 'MainPages/Demandes/OffreService.dart';
 import 'Messages.dart';
 
+
 class MyDrawer extends StatefulWidget {
   final VoidCallback toggleDrawer;
-  // Add a constructor to receive the toggleDrawer function
   const MyDrawer({required this.toggleDrawer});
   @override
   _MyDrawerState createState() => _MyDrawerState();
@@ -33,6 +33,7 @@ class _MyDrawerState extends State<MyDrawer> {
      setState(() {});
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +42,7 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     if (user == null || profileDetails == null) {
-      return Center(child: CircularProgressIndicator()); // Show loading indicator
+      return Center(child: CircularProgressIndicator());
     }
     return Drawer(
       child: Container(
@@ -77,7 +78,7 @@ class _MyDrawerState extends State<MyDrawer> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
+                            children:[
                               IconButton(
                                 icon: Icon(Icons.close, color: Color(0xFF0099D6)),
                                 onPressed: () {
@@ -154,7 +155,7 @@ class _MyDrawerState extends State<MyDrawer> {
                                       ),
                                     ),
                                     Text(
-                                      '99',
+                                      user!.balance.toString() ,
                                       style: GoogleFonts.getFont(
                                         'Roboto',
                                         fontWeight: FontWeight.w500, // Medium Bold
@@ -233,8 +234,6 @@ class _MyDrawerState extends State<MyDrawer> {
                               context,
                               MaterialPageRoute(builder: (context) => OffreScreen()),
                             );
-
-
                           },
                         ),
                         DrawerItem(

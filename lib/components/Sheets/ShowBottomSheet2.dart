@@ -7,21 +7,29 @@ import 'package:khedma/entities/Offre.dart';
 import 'package:khedma/entities/User.dart';
 import 'package:khedma/theme/AppTheme.dart';
 
+import '../Card/NotificationCard.dart';
+import '../Card/SuccessNotificationCard.dart';
+
 void showAddOffreBottomSheet(BuildContext context, int demandId) async {
   OffreService offreService = OffreService();
-  int price = 20; // Initial price
-  int duration = 1; // Initial duration
-  String durationType = 'jours'; // Default duration type
+  SharedPrefService sharedPrefService = SharedPrefService();
+  int price = 20;
+  int duration = 1;
+  String durationType = 'jours';
 
   try {
-    User user = await SharedPrefService().getUser();
+    // Get the current user
+    User user = await sharedPrefService.getUser();
+    int userId = user.id ?? 0;
+
+    // Check if the user has a restricted role
     if (user.roles.contains("USER")) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Restricted Access"),
-            content: Text("As a user, you cannot submit an offer!"),
+            title: Text("Accès restreint"),
+            content: Text("En tant qu'utilisateur, vous ne pouvez pas soumettre une offre !"),
             actions: <Widget>[
               TextButton(
                 child: Text("OK"),
@@ -33,6 +41,28 @@ void showAddOffreBottomSheet(BuildContext context, int demandId) async {
       );
       return;
     }
+
+    List<Offre> existingOffers = await offreService.getOffersByDemand(demandId);
+
+    bool hasUserSubmittedOffer = existingOffers.any((offer) => offer.userId == userId);
+
+    if (hasUserSubmittedOffer) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SuccessDialog(
+            message: 'Vous avez déjà soumis une offre pour cette demande.',
+            logoPath: 'assets/images/logo.png',
+            iconPath: 'assets/icons/echec.png',
+          );
+        },
+      );
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pop(context);
+      });
+      return;
+    }
+
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -61,7 +91,7 @@ void showAddOffreBottomSheet(BuildContext context, int demandId) async {
                     decoration: InputDecoration(
                       labelText: 'Montant de l\'offre',
                       suffixIcon: Padding(
-                        padding: EdgeInsets.only(right: 8.0), // Optional: Adjust padding as needed
+                        padding: EdgeInsets.only(right: 8.0),
                         child: Image.asset("assets/icons/coins.png", width: 24, height: 24),
                       ),
                       border: OutlineInputBorder(
@@ -116,23 +146,44 @@ void showAddOffreBottomSheet(BuildContext context, int demandId) async {
                       try {
                         Offre newOffer = Offre(
                           demandId: demandId,
-                          status: OfferStatus.pending, // Ensure the status is correctly handled in your backend
+                          status: OfferStatus.pending,
                           price: price,
                           periode: "$duration $durationType",
                           acceptedAt: DateTime.now(),
                           finishedAt: DateTime.now(),
-                          userId: user.id ?? 0,
+                          userId: userId,
                         );
                         await offreService.createOffer(newOffer);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Offer successfully submitted!'))
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SuccessDialog(
+                              message: 'Votre offre a été ajoutée avec succès.',
+                              logoPath: 'assets/images/logo.png',
+                              iconPath: 'assets/icons/check1.png',
+                            );
+                          },
                         );
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        });
                       } catch (e) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error submitting offer: $e'))
+                        // Show error dialog
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SuccessDialog(
+                              message: 'Une erreur s\'est produite. Veuillez réessayer !',
+                              logoPath: 'assets/images/logo.png',
+                              iconPath: 'assets/icons/echec.png',
+                            );
+                          },
                         );
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -143,7 +194,7 @@ void showAddOffreBottomSheet(BuildContext context, int demandId) async {
                       padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
                     ),
                     child: Text(
-                      'Submit',
+                      'Soumettre',
                       style: GoogleFonts.roboto(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,

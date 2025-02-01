@@ -15,7 +15,9 @@ import '../entities/Offre.dart';
 import '../entities/ProfileDetails.dart';
 import '../entities/User.dart';
 import '../theme/AppTheme.dart';
+import 'Card/ConfirmationNotficationCard.dart';
 import 'Card/DemandAcceptedOfferCard.dart';
+import 'Card/SuccessNotificationCard.dart';
 import 'appBar/appBar.dart';
 import '../components/Sheets/showBottomSheet.dart';
 class RentalItemMyDemandDetails extends StatelessWidget {
@@ -45,39 +47,55 @@ class RentalItemMyDemandDetails extends StatelessWidget {
     required this.statut,
   }) : super(key: key);
   void _handleCancelPressed(BuildContext context) {
-    print(demandId);
     showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text("Confirm"),
-        content: Text("Are you sure you want to delete this demand?"),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text("No"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop(); // Close the dialog first
-              try {
-                await DemandeService().deleteDemande(demandId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Demand deleted successfully')),
-                );
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              } catch (error) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to delete: $error')),
-                );
-              }
-            },
-            child: Text("Yes"),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return ConfirmationDialog(
+          message: 'Êtes-vous sûr de vouloir supprimer cette demande ?',
+          logoPath: 'assets/images/logo.png',  // Replace with your actual logo path
+          onConfirm: () async {
+            Navigator.of(context).pop(); // Close the dialog first
+            try {
+              await DemandeService().deleteDemande(demandId);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Votre demande a été supprimée',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              });
+            } catch (error) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors de la suppression de votre demande!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Simply close the dialog on cancel
+          },
+        );
+      },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -105,22 +123,22 @@ class RentalItemMyDemandDetails extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Colors.black, // Start with black
+                    Colors.black,
                     Colors.grey[850]!,
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.5),
-                    blurRadius: 10, // Increased blur radius for a smoother shadow
-                    offset: Offset(0, 4), // Slightly larger vertical offset
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
               child: Text(
                 "Détails de la Demande",
                 style: GoogleFonts.roboto(
-                  fontSize: 20.sp, // Font size for emphasis
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -198,7 +216,7 @@ class RentalItemMyDemandDetails extends StatelessWidget {
                               color: Colors.green,
                             ),
                           ),
-                          SizedBox(height: 8.0), // Adding space between texts
+                          SizedBox(height: 8.0),
                           Row(
                             children: [
                               Text(
@@ -211,10 +229,10 @@ class RentalItemMyDemandDetails extends StatelessWidget {
                               ),
                               Image.asset(
                                 "assets/icons/tokenicon.png",
-                                width: 20.w, // Set an appropriate size for the icon
+                                width: 20.w,
                                 height: 20.h,
                               ),
-                              SizedBox(width: 4.w), // Space between icon and text
+                              SizedBox(width: 4.w),
                               Text(
                                 budget.toString(),
                                 style: GoogleFonts.roboto(

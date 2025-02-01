@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:khedma/Services/JWTService.dart';
 import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
@@ -120,7 +121,9 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
     }
     return demands;
   }
-
+  String _formatDateTime(DateTime dateTime) {
+    return DateFormat('yyyy-MM-dd -- HH:MM').format(dateTime);
+  }
   Widget _buildDisponibleSection() {
     return FutureBuilder<List<Demand>>(
       future: getAllDemandsWithUser(),
@@ -138,7 +141,7 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
                 demandId: demand.id ?? 0,
                 imageUrl: 'assets/images/menage.jpeg',
                 title: demand.title ?? '',
-                date: demand.addedDate.toString() ?? '',
+                date: _formatDateTime(demand.addedDate),
                 evalue: true,
                 budget: demand.budget,
                 description: demand.description,
@@ -174,14 +177,13 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
                 description: demand.description,
                 imageUrl: 'assets/images/menage.jpeg',
                 title: demand.title ?? '',
-                date: demand.addedDate.toString() ?? '',
+                date: _formatDateTime(demand.addedDate),
                 evalue: true,
                 budget: demand.budget,
                 location: "*",
                 ownerName: demand.ownerName ?? '',
                 userImage: profileDetails!.profilePicture!,
                 statut: demand.status.toString().split('.').last,
-
               );
             },
           );

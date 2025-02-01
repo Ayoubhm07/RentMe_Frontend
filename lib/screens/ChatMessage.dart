@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/Services/MessagesService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
-import 'package:khedma/components/appBardemande.dart';
 import 'package:khedma/components/navbara.dart';
 import 'package:khedma/screens/SideMenu.dart';
 import 'package:khedma/theme/AppTheme.dart';
@@ -12,6 +11,7 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
+import '../components/appBar/appBar.dart';
 import '../entities/Message.dart';
 import '../entities/User.dart';
 import 'CallScreen.dart';
@@ -23,7 +23,7 @@ class ChatMessagePage extends StatefulWidget {
 
   ChatMessagePage({required this.conversationId , required this.receiver , required this.currentUser});
 
- @override
+  @override
   _ChatMessagePageState createState() => _ChatMessagePageState();
 }
 
@@ -65,8 +65,8 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
   }
 
   void _connectWebSocket() async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    String username = widget.currentUser.userName;
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    String username = widget.currentUser.userName!;
     String conversationId = widget.conversationId.toString();
 
     final headers = {
@@ -208,14 +208,14 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
       backgroundColor: Color(0XFFEFF6F9),
       endDrawer: _isSettingsDrawer
           ? Builder(
-              builder: (context) =>
-                  SettingsDrawer(toggleDrawer: () => _toggleDrawer(context)),
-            )
+        builder: (context) =>
+            SettingsDrawer(toggleDrawer: () => _toggleDrawer(context)),
+      )
           : Builder(
-              builder: (context) =>
-                  MyDrawer(toggleDrawer: () => _toggleDrawer(context)),
-            ),
-      appBar: CustomAppBard(
+        builder: (context) =>
+            MyDrawer(toggleDrawer: () => _toggleDrawer(context)),
+      ),
+      appBar: CustomAppBar(
         notificationIcon: Icon(Icons.location_on_outlined, color: Colors.white),
         title: 'Messages',
         showSearchBar: false,
@@ -280,7 +280,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                                       decoration: BoxDecoration(
                                         color: Color(0xFF66CA98),
                                         borderRadius:
-                                            BorderRadius.circular(3.5),
+                                        BorderRadius.circular(3.5),
                                       ),
                                       width: 7,
                                       height: 7,
@@ -311,7 +311,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                           invitees: [
                             ZegoUIKitUser(
                               id: widget.receiver.id.toString(),
-                              name: widget.receiver.userName,
+                              name: widget.receiver.userName!,
                             )
                           ],
                         ),
@@ -325,7 +325,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                           invitees: [
                             ZegoUIKitUser(
                               id: widget.receiver.id.toString(),
-                              name: widget.receiver.userName,
+                              name: widget.receiver.userName!,
                             )
                           ],
                         ),
@@ -341,76 +341,76 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
             child: isLoading // Show loading indicator if loading
                 ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final isSentByUser =
-                          int.parse(message.senderId) == widget.currentUser.id;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        // Add vertical padding
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (!isSentByUser) Spacer(),
-                            if (isSentByUser)
-                              Container(
-                                width: 20,
-                                height: 20,
-                                margin: EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: AssetImage('assets/icons/Dr.png'),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 15),
-                              decoration: BoxDecoration(
-                                color: isSentByUser
-                                    ? Color(0xFF6295E2)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              constraints: BoxConstraints(
-                                maxWidth: 229.88,
-                                minHeight: 46.25,
-                              ),
-                              child: Text(
-                                message.content,
-                                style: GoogleFonts.getFont(
-                                  'Inter',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: isSentByUser
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                final isSentByUser =
+                    int.parse(message.senderId) == widget.currentUser.id;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  // Add vertical padding
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isSentByUser) Spacer(),
+                      if (isSentByUser)
+                        Container(
+                          width: 20,
+                          height: 20,
+                          margin: EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: AssetImage('assets/icons/Dr.png'),
+                              fit: BoxFit.cover,
                             ),
-                            if (!isSentByUser)
-                              Container(
-                                width: 20,
-                                height: 20,
-                                margin: EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: AssetImage('assets/icons/Dr.png'),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                          ],
+                          ),
                         ),
-                      );
-                    },
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 15),
+                        decoration: BoxDecoration(
+                          color: isSentByUser
+                              ? Color(0xFF6295E2)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: 229.88,
+                          minHeight: 46.25,
+                        ),
+                        child: Text(
+                          message.content,
+                          style: GoogleFonts.getFont(
+                            'Inter',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isSentByUser
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
+                      if (!isSentByUser)
+                        Container(
+                          width: 20,
+                          height: 20,
+                          margin: EdgeInsets.only(left: 10),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: AssetImage('assets/icons/Dr.png'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
+                );
+              },
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 20, right: 10 , left: 10),
@@ -455,7 +455,7 @@ class _ChatMessagePageState extends State<ChatMessagePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       ),
                       onSubmitted: _sendMessage,
                     ),

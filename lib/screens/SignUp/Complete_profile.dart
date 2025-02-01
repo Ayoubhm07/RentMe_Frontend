@@ -26,10 +26,10 @@ class CompleteProfileController {
       errorMessage = 'Veuillez sélectionner une spécialité';
       result = {'error': true, 'message': errorMessage};
     } else if(_controller.text.isEmpty)
-      {
-        errorMessage = 'Veuillez remplir la description';
-        result = {'error': true, 'message': errorMessage};
-      }
+    {
+      errorMessage = 'Veuillez remplir la description';
+      result = {'error': true, 'message': errorMessage};
+    }
     else if (images.isEmpty) {
       errorMessage = 'Veuillez ajouter un projet';
       result = {'error': true, 'message': errorMessage};
@@ -53,18 +53,18 @@ class CompleteProfileController {
     }
 
     for(String? j in _selectedImagePaths) {
-        if (j!.isNotEmpty) {
-          if (images.isEmpty) {
-            images = j;
-          }
-          else {
-            images = '$images,$j';
-          }
+      if (j!.isNotEmpty) {
+        if (images.isEmpty) {
+          images = j;
         }
+        else {
+          images = '$images,$j';
+        }
+      }
     }
-    sharedPrefService.saveUserData('specialities', specialities);
-    sharedPrefService.saveUserData('projets', images);
-    sharedPrefService.saveUserData('description', _controller.text);
+    sharedPrefService.saveStringToPrefs('specialities', specialities);
+    sharedPrefService.saveStringToPrefs('projets', images);
+    sharedPrefService.saveStringToPrefs('description', _controller.text);
   }
 }
 
@@ -91,7 +91,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
   Future<void> _loadSpecialities() async {
     final String response = await rootBundle.loadString('assets/json/job.json');
     final List<dynamic> data = json.decode(response);
-    String currentRole = await widget.controller.sharedPrefService.readUserData('newRole');
+    String currentRole = await widget.controller.sharedPrefService.readStringFromPrefs('newRole');
     setState(() {
       isAmateur = currentRole == 'amateur';
       _specialities = List<String>.from(data);
@@ -202,7 +202,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                       runSpacing: 8,
                       children: widget.controller._selectedSpecialities
                           .map((speciality) =>
-                              _buildSpecializationCard(speciality))
+                          _buildSpecializationCard(speciality))
                           .toList(),
                     ),
                   ),
@@ -353,7 +353,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 Container(
                   margin: EdgeInsets.only(bottom: 30.1),
                   child: Text(
-                        isAmateur
+                    isAmateur
                         ? 'Ajoutez vos projets'
                         : 'Ajoutez vos certificats',
                     style: GoogleFonts.roboto(
@@ -413,34 +413,34 @@ class _CompleteProfileState extends State<CompleteProfile> {
                           fit: BoxFit.cover,
                         )*/
 
-                      Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              color: Colors.red,
-                              size: size * 0.4,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              File(widget
-                                      .controller._selectedImagePaths[index]!)
-                                  .path
-                                  .split('/')
-                                  .last.substring(0,12),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        )
-                      : Image.asset(
-                          'assets/icons/image.png',
-                          width: size * 0.4,
-                          height: size * 0.4,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: size * 0.4,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        File(widget
+                            .controller._selectedImagePaths[index]!)
+                            .path
+                            .split('/')
+                            .last.substring(0,12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                      : Image.asset(
+                    'assets/icons/image.png',
+                    width: size * 0.4,
+                    height: size * 0.4,
+                  ),
                 ),
               ),
             ),
@@ -458,7 +458,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   onTap: () async {
                     if (widget.controller._selectedImagePaths[index] == '') {
                       FilePickerResult? result =
-                          await FilePicker.platform.pickFiles(
+                      await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['pdf'],
                       );
@@ -480,15 +480,15 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   child: Center(
                     child: widget.controller._selectedImagePaths[index] != ''
                         ? Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          )
+                      Icons.remove,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    )
                         : Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          ),
+                      Icons.add,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    ),
                   ),
                 ),
               ),

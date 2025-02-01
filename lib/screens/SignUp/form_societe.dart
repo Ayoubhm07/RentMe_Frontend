@@ -34,11 +34,11 @@ class FormSocieteController {
 
   void save() {
     // save the data to shared preferences
-    sharedPrefService.saveUserData('NomSociete', nomSocieteController.text);
-    sharedPrefService.saveUserData('DomaineActivite', domaineActiviteController.text);
-    sharedPrefService.saveUserData('KBIS', _selectedDocuments[0]);
-    sharedPrefService.saveUserData('LabelQualite', _selectedDocuments[1]);
-    sharedPrefService.saveUserData('Assurance', _selectedDocuments[2]);
+    sharedPrefService.saveStringToPrefs('NomSociete', nomSocieteController.text);
+    sharedPrefService.saveStringToPrefs('DomaineActivite', domaineActiviteController.text);
+    sharedPrefService.saveStringToPrefs('KBIS', _selectedDocuments[0]);
+    sharedPrefService.saveStringToPrefs('LabelQualite', _selectedDocuments[1]);
+    sharedPrefService.saveStringToPrefs('Assurance', _selectedDocuments[2]);
   }
 }
 
@@ -184,14 +184,14 @@ class _FormSocieteState extends State<FormSociete> {
         decoration: InputDecoration(
           hintText: textFieldData['hint'],
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           // Ajoutez le padding ici
           hintStyle: const TextStyle(color: AppTheme.secondaryColor),
           // Changer la couleur du hint text ici
 
           border: const UnderlineInputBorder(
             borderSide:
-                BorderSide(color: AppTheme.grisTextField), // Bordure blanche
+            BorderSide(color: AppTheme.grisTextField), // Bordure blanche
           ),
           enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(
@@ -232,33 +232,33 @@ class _FormSocieteState extends State<FormSociete> {
                   padding: EdgeInsets.only(bottom: size * 0.1),
                   child: widget.controller._selectedDocuments[index] != ''
                       ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              color: Colors.red,
-                              size: size * 0.4,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              File(widget.controller._selectedDocuments[index])
-                                  .path
-                                  .split('/')
-                                  .last
-                                  .substring(0, 12),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        )
-                      : Image.asset(
-                          'assets/icons/image.png',
-                          width: size * 0.4,
-                          height: size * 0.4,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: size * 0.4,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        File(widget.controller._selectedDocuments[index])
+                            .path
+                            .split('/')
+                            .last
+                            .substring(0, 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                      : Image.asset(
+                    'assets/icons/image.png',
+                    width: size * 0.4,
+                    height: size * 0.4,
+                  ),
                 ),
               ),
             ),
@@ -276,7 +276,7 @@ class _FormSocieteState extends State<FormSociete> {
                   onTap: () async {
                     if (widget.controller._selectedDocuments[index] == '') {
                       FilePickerResult? result =
-                          await FilePicker.platform.pickFiles(
+                      await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['pdf'],
                       );
@@ -298,15 +298,15 @@ class _FormSocieteState extends State<FormSociete> {
                   child: Center(
                     child: widget.controller._selectedDocuments[index] != ''
                         ? Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          )
+                      Icons.remove,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    )
                         : Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          ),
+                      Icons.add,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    ),
                   ),
                 ),
               ),

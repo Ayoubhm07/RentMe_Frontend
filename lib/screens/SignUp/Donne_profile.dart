@@ -33,8 +33,8 @@ class DonneeProfileController
 
   void save()
   {
-    sharedPrefService.saveUserData('newRole', selectedProfile);
-    sharedPrefService.saveUserData('image', selectedImagePath);
+    sharedPrefService.saveStringToPrefs('newRole', selectedProfile);
+    sharedPrefService.saveStringToPrefs('image', selectedImagePath);
   }
 
 }
@@ -174,7 +174,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                                   children: [
                                     Container(
                                       margin:
-                                          EdgeInsets.fromLTRB(1.8, 0, 0, 14.3),
+                                      EdgeInsets.fromLTRB(1.8, 0, 0, 14.3),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(15),
                                         color: Color(0xFFFFFFFF),
@@ -193,9 +193,9 @@ class _DonneeProfileState extends State<DonneeProfile> {
                                               0, 26.3, 0, 26.2),
                                           child: Column(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.start,
+                                            MainAxisAlignment.start,
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                             children: [
                                               Container(
                                                 margin: EdgeInsets.fromLTRB(
@@ -205,18 +205,18 @@ class _DonneeProfileState extends State<DonneeProfile> {
                                                   height: 250,
                                                   child: widget.controller._image == null
                                                       ? Image.asset(
-                                                          'assets/icons/Icon.png')
+                                                      'assets/icons/Icon.png')
                                                       : ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(15),
-                                                          child: Image.file(
-                                                            widget.controller._image!,
-                                                            width: 250,
-                                                            height: 250,
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
+                                                    borderRadius:
+                                                    BorderRadius
+                                                        .circular(15),
+                                                    child: Image.file(
+                                                      widget.controller._image!,
+                                                      width: 250,
+                                                      height: 250,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ],
@@ -241,7 +241,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                                     width: 25.6,
                                     height: 25.5,
                                     child:
-                                        Image.asset('assets/icons/Shape.png'),
+                                    Image.asset('assets/icons/Shape.png'),
                                   ),
                                 ),
                               ],
@@ -293,7 +293,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'expert';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(
@@ -340,7 +340,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'amateur';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(
@@ -386,7 +386,7 @@ class _DonneeProfileState extends State<DonneeProfile> {
                         onTap: () {
                           setState(() {
                             widget.controller.selectedProfile = 'professionel';
-                            sharedPrefService.saveUserData('role', widget.controller.selectedProfile);
+                            sharedPrefService.saveStringToPrefs('role', widget.controller.selectedProfile);
                           });
                         },
                         child: Column(

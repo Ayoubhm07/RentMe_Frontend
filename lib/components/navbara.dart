@@ -4,9 +4,9 @@ import 'package:khedma/screens/Messages.dart';
 
 import '../screens/ChatMessage.dart';
 import '../screens/MainPages/Demandes/AjouterDemande.dart';
-import '../screens/MainPages/HomePage.dart';
+import '../screens/MainPages/Home/HomePage.dart';
 import '../screens/MainPages/RequestsPage.dart';
-import '../screens/Profile.dart';
+import '../screens/NewProfile.dart';
 import '../theme/AppTheme.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -18,6 +18,25 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
+    if (index == 1) {
+      // If case 2 (index 1), don't navigate, just show a tooltip
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Bientôt disponible',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.blue,
+        ),
+      );
+      return; // Prevent further action
+    }
+
     setState(() {
       _selectedIndex = index;
     });
@@ -28,14 +47,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(),
-          ),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyRequestsPage(),
           ),
         );
         break;
@@ -70,16 +81,39 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
-      // Set the onTap handler
       items: [
         BottomNavigationBarItem(
-          icon: Image.asset("assets/icons/Home.png",
-              height: iconSize, width: iconSize),
+          icon: Image.asset(
+            "assets/icons/Home.png",
+            height: iconSize,
+            width: iconSize,
+          ),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset("assets/icons/journal.png",
-              height: iconSize * 0.9, width: iconSize * 0.9),
+          icon: Stack(
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: 0.5, // Make the icon appear dimmed
+                child: Image.asset(
+                  "assets/icons/journal.png",
+                  height: iconSize * 0.9,
+                  width: iconSize * 0.9,
+                ),
+              ),
+              Positioned(
+                top: -10.h,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.orangeAccent,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
           label: '',
         ),
         BottomNavigationBarItem(
@@ -88,24 +122,32 @@ class _BottomNavBarState extends State<BottomNavBar> {
             width: iconSize * 1.5,
             decoration: BoxDecoration(
               color: AppTheme.primaryColor,
-              // Adjust the color as per your theme
               borderRadius: BorderRadius.circular(iconSize * 0.75),
             ),
             child: Center(
-              child: Image.asset("assets/icons/plus.png",
-                  height: iconSize * 0.8, width: iconSize * 0.8),
+              child: Image.asset(
+                "assets/icons/plus.png",
+                height: iconSize * 0.8,
+                width: iconSize * 0.8,
+              ),
             ),
           ),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset("assets/icons/chat.png",
-              height: iconSize, width: iconSize),
+          icon: Image.asset(
+            "assets/icons/chat.png",
+            height: iconSize,
+            width: iconSize,
+          ),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset("assets/icons/profile.png",
-              height: iconSize * 0.8, width: iconSize * 0.8),
+          icon: Image.asset(
+            "assets/icons/profile.png",
+            height: iconSize * 0.8,
+            width: iconSize * 0.8,
+          ),
           label: '',
         ),
       ],

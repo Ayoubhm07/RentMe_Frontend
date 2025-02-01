@@ -10,6 +10,7 @@ import 'package:khedma/screens/SideMenu.dart';
 import '../Services/SharedPrefService.dart';
 import '../entities/ProfileDetails.dart';
 import '../entities/User.dart';
+import 'TokenConverter.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -25,37 +26,14 @@ class _ProfilePageState extends State<ProfilePage> {
     profileDetails = await sharedPrefService.getProfileDetails();
     setState(() {});
   }
-
-
-  void _incrementValue(TextEditingController controller) {
-    setState(() {
-      int currentValue = int.tryParse(controller.text) ?? 0;
-      currentValue += 1;
-      controller.text = currentValue.toString();
-    });
-  }
-
-  void _decrementValue(TextEditingController controller) {
-    setState(() {
-      int currentValue = int.tryParse(controller.text) ?? 0;
-      if (currentValue > 0) {
-        currentValue -= 1;
-      }
-      controller.text = currentValue.toString();
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     loadUserandDetails();
   }
-
-
   @override
   Widget build(BuildContext context) {
     if (user == null || profileDetails == null) {
-      // white background and progress indicator
       return Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -70,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Color(0xFF0099D6),
         iconTheme: IconThemeData(
           color: Colors
-              .white, // Set the color of the icons (including the menu icon)
+              .white,
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   backgroundColor: Colors.transparent,
                                   builder: (BuildContext context) {
                                     return FractionallySizedBox(
-                                      heightFactor: 0.85, // Adjust this value to change the height of the modal
+                                      heightFactor: 0.6,
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: Colors.white,
@@ -206,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             topRight: Radius.circular(20),
                                           ),
                                         ),
-                                        child: AchatTokenScreen(), // Your custom widget for purchasing tokens
+                                        child: AchatTokenScreen(),
                                       ),
                                     );
                                   },
@@ -220,6 +198,45 @@ class _ProfilePageState extends State<ProfilePage> {
                                 padding: EdgeInsets.fromLTRB(17.8, 7, 17.8, 8),
                                 child: Text(
                                   'Convertion',
+                                  style: GoogleFonts.getFont(
+                                    'Roboto',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12.7,
+                                    color: Color(0xFFF4F6F5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10,),
+                            GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: MediaQuery.of(context).size.height * 0.6,  // Adjust the multiplier to control the height
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: TokenConverterScreen(),  // Your custom widget for purchasing tokens
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(23),
+                                ),
+                                padding: EdgeInsets.fromLTRB(17.8, 7, 17.8, 8),
+                                child: Text(
+                                  'Retrait',
                                   style: GoogleFonts.getFont(
                                     'Roboto',
                                     fontWeight: FontWeight.w600,
@@ -281,7 +298,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ),
                                   Text(
-                                    // based on the user role show the user profile type , there are 4 roles
                                     user!.roles == 'USER'
                                         ? 'Client'
                                         : user!.roles == 'amateur'
@@ -488,119 +504,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       bottomNavigationBar: BottomNavBar(),
-    );
-  }
-
-  Widget _buildIncrementDecrementButtons(TextEditingController controller) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          margin: EdgeInsets.fromLTRB(0, 0, 0, 1.3),
-          decoration: BoxDecoration(
-            border: Border.all(color: Color(0xFF0099D5)),
-            borderRadius: BorderRadius.circular(6.6),
-            color: Color(0xFFF4F6F5),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x11124565),
-                offset: Offset(0, 4),
-                blurRadius: 7,
-              ),
-            ],
-          ),
-          child: InkWell(
-            onTap: () => _incrementValue(controller),
-            child: Container(
-              padding: EdgeInsets.fromLTRB(6.9, 1.8, 6.9, 2.8),
-              child: Text(
-                '+',
-                style: GoogleFonts.getFont(
-                  'Inter',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13.3,
-                  color: Color(0xFF1C1F1E),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Color(0xFF0099D5)),
-            borderRadius: BorderRadius.circular(6.6),
-            color: Color(0xFFF4F6F5),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x11124565),
-                offset: Offset(0, 4),
-                blurRadius: 7,
-              ),
-            ],
-          ),
-          child: InkWell(
-            onTap: () => _decrementValue(controller),
-            child: Container(
-              padding: EdgeInsets.fromLTRB(6.9, 1.8, 6.9, 2.8),
-              child: Text(
-                '-',
-                style: GoogleFonts.getFont(
-                  'Inter',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13.3,
-                  color: Color(0xFF1C1F1E),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildText(TextEditingController controller) {
-    return Container(
-      height: 25,
-      child: Center(
-        child: Text(
-          controller.text,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String hint,
-    required TextEditingController controller,
-  }) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
-
-  Widget _buildDateField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16),
-        ),
-        SizedBox(height: 5),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        ),
-      ],
     );
   }
 }

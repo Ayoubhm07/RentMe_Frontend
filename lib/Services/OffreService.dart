@@ -17,8 +17,37 @@ class OffreService {
   NotificationService notificationService = NotificationService();
   DemandeService demandeService =DemandeService();
   UserService userService = UserService();
+
+
+  Future<Offre> getOfferById(int id) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.get(
+        Uri.parse('$url/get/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        print('Offre récupérée avec succès');
+        print(response.body);
+        Map<String, dynamic> body = json.decode(response.body);
+        Offre offer = Offre.fromJson(body);
+        return offer;
+      } else {
+        throw Exception(
+            'Échec de la récupération de l\'offre: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+
   Future<List<Offre>> getOffersByDemand(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByDemandId/$id'),
@@ -27,7 +56,6 @@ class OffreService {
           'Authorization': 'Bearer $accessToken',
         },
       );
-
       if (response.statusCode == 200) {
         print('Offres récupérées avec succès');
         print(response.body);
@@ -49,7 +77,7 @@ class OffreService {
 
 
   Future<List<Offre>> getOffersByUser(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByUserId/$userId'),
@@ -74,7 +102,7 @@ class OffreService {
   }
 
   Future<List<Offre>> getOffersByLocation(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByLocationId/$id'),
@@ -109,7 +137,7 @@ class OffreService {
     Demand demand = await demandeService.getDemandById(offer.demandId);
     int receiverId = demand.userId;
     User receiver = await userService.findUserById(receiverId);
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     print("User FCM Token: ${user.fcmToken}");
     try {
       final response = await http.post(
@@ -124,7 +152,7 @@ class OffreService {
       if (response.statusCode == 200) {
         if (user.fcmToken != null && user.fcmToken!.isNotEmpty) {
           NotificationRequest notificationRequest = NotificationRequest(
-              title: "Nouvelle offre ajoutée",
+              title: "Nouvelle offre ajoutee",
               body: "Vous avez recu une offre de la part de ${user.userName}",
               token: receiver.fcmToken ?? "",
               userId: receiverId ,
@@ -148,7 +176,7 @@ class OffreService {
 
 
   Future<List<Offre>> getOffersByUserIdAndStatus(int userId, String status) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(
         Uri.parse('$url/getByUserIdandStatus/$userId/$status'),
@@ -173,7 +201,7 @@ class OffreService {
   }
 
   Future<String> deleteOffer(int offerId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.delete(
         Uri.parse('$url/deleteOffer/$offerId'),
@@ -197,7 +225,11 @@ class OffreService {
   }
 
   Future<void> acceptOffer(int offerId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    User user = await sharedPrefService.getUser();
+    Offre offre = await OffreService().getOfferById(offerId);
+    int receiverId = offre.userId;
+    User receiver = await userService.findUserById(receiverId);
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.patch(
         Uri.parse('$url/$offerId/accept'),
@@ -206,9 +238,58 @@ class OffreService {
           'Authorization': 'Bearer $accessToken',
         },
       );
-
       if (response.statusCode == 200) {
-        print('Offer accepted successfully');
+        if (user.fcmToken != null && user.fcmToken!.isNotEmpty) {
+          NotificationRequest notificationRequest = NotificationRequest(
+              title: "Offre Acceptee",
+              body: "${user.userName} a accepte votre offre.",
+              token: receiver.fcmToken ?? "",
+              userId: receiverId ,
+              topic: 'offre');
+          await notificationService.sendNotificationByToken(notificationRequest);
+          print('Offre créée avec succès');
+        } else {
+          print("No FCM token available; skipping notification send.");
+        }
+      } else {
+        throw Exception('Failed to accept offer: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Connection error when accepting offer: $e');
+      throw Exception('Connection error when accepting offer: $e');
+    }
+  }
+
+
+  Future<void> TerminerOffer(int offerId) async {
+    User user = await sharedPrefService.getUser();
+    Offre offre = await OffreService().getOfferById(offerId);
+    int demandId = offre.demandId;
+    Demand demand = await demandeService.getDemandById(demandId);
+    User receiver = await userService.findUserById(demand.userId);
+    int? receiverId = receiver.id;
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.patch(
+        Uri.parse('$url/$offerId/done'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        if (user.fcmToken != null && user.fcmToken!.isNotEmpty) {
+          NotificationRequest notificationRequest = NotificationRequest(
+              title: "Offre Terminee",
+              body: "Vous devez payer ${user.userName}.",
+              token: receiver.fcmToken ?? "",
+              userId: receiverId ?? 0,
+              topic: 'offre');
+          await notificationService.sendNotificationByToken(notificationRequest);
+          print('Offre terminée avec succès');
+        } else {
+          print("No FCM token available; skipping notification send.");
+        }
       } else {
         throw Exception('Failed to accept offer: ${response.reasonPhrase}');
       }

@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import '../../Services/OffreLocationService.dart';
 import '../../entities/OffreLocation.dart';
+import 'ConfirmationNotficationCard.dart';
+import 'SuccessNotificationCard.dart';
 
 class OfferDetailsCard extends StatelessWidget {
   final OffreLocation offer;
@@ -13,16 +15,64 @@ class OfferDetailsCard extends StatelessWidget {
 
   OfferDetailsCard({Key? key, required this.offer, required this.username}) : super(key: key);
 
-  Future<void> terminerOffre(int id) async {
-    OffreLocationService offreLocationService = OffreLocationService();
-    try {
-      OffreLocation updatedOffer = await offreLocationService.terminerOffre(id);
-      print('Offer updated successfully: ${updatedOffer.toJson()}');
-    } catch (e) {
-      print('Failed to update offer: $e');
-      throw Exception('Failed to update offer: $e');
-    }
+  Future<void> terminerOffre(BuildContext context, int id) async {
+    final offreLocationService = OffreLocationService();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ConfirmationDialog(
+          message: 'Voulez-vous vraiment terminer cette offre ?',
+          logoPath: 'assets/images/logo.png',
+          onConfirm: () async {
+            Navigator.of(context).pop(); // Close the ConfirmationDialog
+            try {
+              await offreLocationService.terminerOffre(id);
+              print('Offre terminée avec succès');
+              showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return SuccessDialog(
+                    message: 'Offre terminée avec succès!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pop(); // Close SuccessDialog
+                  Navigator.of(context).pop(); // Close SuccessDialog
+                }
+              });
+            } catch (e) {
+              print('Échec de la terminaison de l\'offre: $e');
+              showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return SuccessDialog(
+                    message: 'Échec de la terminaison de l\'offre: $e',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+
+              // Close error dialog after 2 seconds
+              Future.delayed(Duration(seconds: 2), () {
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pop();
+                }
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Close the ConfirmationDialog if canceled
+          },
+        );
+      },
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +97,7 @@ class OfferDetailsCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10.h),
-            iconTextRow(Icons.person, "Username: $username"),
+            iconTextRow(Icons.person, "Postulé par: $username"),
             iconTextRow(Icons.attach_money, "Prix: ${offer.price}£"),
             iconTextRow(Icons.calendar_today, "Période: ${offer.periode}"),
             SizedBox(height: 20.h),
@@ -68,7 +118,7 @@ class OfferDetailsCard extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => terminerOffre(offer.id ?? 0),
+                  onPressed: () => terminerOffre(context,offer.id ?? 0),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.green[800],
                     backgroundColor: Colors.white,

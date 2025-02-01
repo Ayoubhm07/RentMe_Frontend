@@ -35,7 +35,6 @@ class Location {
       userId: json['userId'],
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,

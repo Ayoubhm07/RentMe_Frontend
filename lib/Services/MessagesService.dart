@@ -9,7 +9,7 @@ class MessageService {
   String apiUrl = 'http://localhost:8080/chat'; // L'URL de votre API Gateway
   Future<List<Message>> fetchMessagesByConversationId(
       int conversationId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     var response = await http.get(
       Uri.parse('$apiUrl/message/getMessagesByConversationId/$conversationId'),
       headers: {

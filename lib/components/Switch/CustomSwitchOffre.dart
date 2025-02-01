@@ -24,7 +24,6 @@ class _CustomSwitchOffreState extends State<CustomSwitchOffre> {
   @override
   void initState() {
     super.initState();
-    // Initialise isSelected avec la longueur de buttonLabels
     isSelected = List.generate(widget.buttonLabels.length, (index) => index == 0);
   }
 

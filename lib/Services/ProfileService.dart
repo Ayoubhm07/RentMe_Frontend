@@ -7,7 +7,7 @@ class ProfileService {
   final String apiUrl = 'http://localhost:8080/profileDetail';
   SharedPrefService sharedPrefService = SharedPrefService();
   Future<bool> saveProfileDetails(ProfileDetails profileDetails) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     final response = await http.post(
       Uri.parse('$apiUrl/create'),
       headers: {
@@ -25,7 +25,7 @@ class ProfileService {
     }
   }
   Future<ProfileDetails> getProfileDetails(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     final response = await http.get(
       Uri.parse('$apiUrl/getProfileDateilsById/$id'), // Point de terminaison pour récupérer les détails du profil
       headers: {
@@ -42,7 +42,7 @@ class ProfileService {
   }
 
   Future<String?> getProfileImage(int i) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     final response = await http.get(
       Uri.parse('$apiUrl/getProfileDateilsById/$i'), // Point de terminaison pour récupérer les détails du profil
       headers: {

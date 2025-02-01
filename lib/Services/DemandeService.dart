@@ -10,8 +10,7 @@ class DemandeService {
   SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<Demand> saveDemande(Demand demande) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.post(
         Uri.parse('$url/create'),
         headers: {
@@ -38,8 +37,7 @@ class DemandeService {
   }
 
   Future<Demand> getDemandById(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(
         Uri.parse('$url/get/$id'),
         headers: {
@@ -61,8 +59,7 @@ class DemandeService {
   }
 
   Future<List<Demand>> getDemandsByUserId(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(
         Uri.parse('$url/getByUserId/$id'),
         headers: {
@@ -90,8 +87,7 @@ class DemandeService {
   }
 
   Future<List<Demand>> getAllDemands() async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(
         Uri.parse('$url/getAll'),
         headers:{
@@ -120,8 +116,7 @@ class DemandeService {
   }
 
   Future<String> deleteDemande(int demandId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.delete(
         Uri.parse('$url/delete/$demandId'),
         headers: {
@@ -143,8 +138,7 @@ class DemandeService {
   }
 
   Future<Demand> updateDemandPrice(int id, double price) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.patch(
         Uri.parse('$url/$id/$price'),
         headers: {
@@ -168,8 +162,7 @@ class DemandeService {
 
 
   Future<Demand> updateDemandStatus(int id) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.patch(
         Uri.parse('$url/$id/status'),
         headers: {
@@ -192,8 +185,7 @@ class DemandeService {
   }
 
   Future<List<Demand>> getDemandsByNotUserId(int userId) async {
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-    final response = await http.get(
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    final response = await http.get(
       Uri.parse('$url/not-user/$userId'),
       headers: {
         'Authorization': 'Bearer $accessToken'

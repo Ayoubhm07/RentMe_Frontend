@@ -6,14 +6,13 @@ import 'JWTService.dart';
 import 'SharedPrefService.dart';
 
 class ConversationAndMessageService {
-  final String apiUrl =
-      'http://localhost:8080/chat'; // L'URL de votre API Gateway
+  final String apiUrl = 'http://localhost:8080/chat';
   JWTService jwtService = JWTService();
   SharedPrefService sharedPrefService = SharedPrefService();
 
   Future<List<Conversation>> FetchUserConversation(int id) async {
     try {
-      String accessToken = await sharedPrefService.readUserData('accessToken');
+      String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
 
       var response = await http.get(
         Uri.parse('$apiUrl/conversation/getConversationsByUserId/$id'),

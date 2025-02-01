@@ -28,7 +28,7 @@ class FormDiplomeController {
   }
 
   void save() {
-    sharedPrefService.saveUserData('diplome', _selectedDiplome);
+    sharedPrefService.saveStringToPrefs('diplome', _selectedDiplome);
     String formations = '';
     for (String f in _selectedFormatinos) {
       if (formations.isEmpty) {
@@ -39,7 +39,7 @@ class FormDiplomeController {
         }
       }
     }
-    sharedPrefService.saveUserData('formations', formations);
+    sharedPrefService.saveStringToPrefs('formations', formations);
   }
 }
 
@@ -189,34 +189,34 @@ class _formDiplomeState extends State<formDiplome> {
                           fit: BoxFit.cover,
                         )*/
 
-                      Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              color: Colors.red,
-                              size: size * 0.4,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              File(widget.controller._selectedFormatinos[index])
-                                  .path
-                                  .split('/')
-                                  .last
-                                  .substring(0, 12),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        )
-                      : Image.asset(
-                          'assets/icons/image.png',
-                          width: size * 0.4,
-                          height: size * 0.4,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: size * 0.4,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        File(widget.controller._selectedFormatinos[index])
+                            .path
+                            .split('/')
+                            .last
+                            .substring(0, 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                      : Image.asset(
+                    'assets/icons/image.png',
+                    width: size * 0.4,
+                    height: size * 0.4,
+                  ),
                 ),
               ),
             ),
@@ -234,7 +234,7 @@ class _formDiplomeState extends State<formDiplome> {
                   onTap: () async {
                     if (widget.controller._selectedFormatinos[index] == '') {
                       FilePickerResult? result =
-                          await FilePicker.platform.pickFiles(
+                      await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['pdf'],
                       );
@@ -256,15 +256,15 @@ class _formDiplomeState extends State<formDiplome> {
                   child: Center(
                     child: widget.controller._selectedFormatinos[index] != ''
                         ? Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          )
+                      Icons.remove,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    )
                         : Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          ),
+                      Icons.add,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    ),
                   ),
                 ),
               ),
@@ -301,33 +301,33 @@ class _formDiplomeState extends State<formDiplome> {
                   padding: EdgeInsets.only(bottom: size * 0.1),
                   child: widget.controller._selectedDiplome != ''
                       ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.picture_as_pdf,
-                              color: Colors.red,
-                              size: size * 0.4,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              File(widget.controller._selectedDiplome)
-                                  .path
-                                  .split('/')
-                                  .last
-                                  .substring(0, 12),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        )
-                      : Image.asset(
-                          'assets/icons/image.png',
-                          width: size * 0.4,
-                          height: size * 0.4,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: size * 0.4,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        File(widget.controller._selectedDiplome)
+                            .path
+                            .split('/')
+                            .last
+                            .substring(0, 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                      : Image.asset(
+                    'assets/icons/image.png',
+                    width: size * 0.4,
+                    height: size * 0.4,
+                  ),
                 ),
               ),
             ),
@@ -345,7 +345,7 @@ class _formDiplomeState extends State<formDiplome> {
                   onTap: () async {
                     if (widget.controller._selectedDiplome == '') {
                       FilePickerResult? result =
-                          await FilePicker.platform.pickFiles(
+                      await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['pdf'],
                       );
@@ -367,15 +367,15 @@ class _formDiplomeState extends State<formDiplome> {
                   child: Center(
                     child: widget.controller._selectedDiplome != ''
                         ? Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          )
+                      Icons.remove,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    )
                         : Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: size * 0.18,
-                          ),
+                      Icons.add,
+                      color: Colors.white,
+                      size: size * 0.18,
+                    ),
                   ),
                 ),
               ),

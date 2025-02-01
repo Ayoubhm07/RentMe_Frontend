@@ -20,15 +20,15 @@ class NotificationMessage {
   factory NotificationMessage.fromJson(Map<String, dynamic> json) {
     return NotificationMessage(
       id: json['id'],
-      title: json['title'] ?? 'No Title', // Default value if null
-      body: json['body'] ?? 'No Body', // Default value if null
-      topic: json['topic'] ?? 'No Topic', // Default value if null
-      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()), // Use current time if null
+      title: json['title'] ?? 'No Title',
+      body: json['body'] ?? 'No Body',
+      topic: json['topic'] ?? 'No Topic',
+      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       state: NotificationState.values.firstWhere(
               (e) => e.toString() == 'NotificationState.${json['state']?.toString().toLowerCase()}',
-          orElse: () => NotificationState.unread // Default state if not found or null
+          orElse: () => NotificationState.unread
       ),
-      userId: json['userId'] ?? 0, // Default to 0 if null
+      userId: json['userId'] ?? 0,
     );
   }
 }

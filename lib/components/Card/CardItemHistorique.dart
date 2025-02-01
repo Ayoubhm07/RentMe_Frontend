@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../Services/MinIOService.dart';
 import '../../Services/OffreLocationService.dart';
 import '../../Services/UserService.dart';
 import '../../entities/OffreLocation.dart';
@@ -13,20 +16,20 @@ import 'AcceptedOfferDetailsCard.dart';
 class RentalItemCardHistorique extends StatefulWidget {
   final String imageUrl;
   final String title;
-  final String description;
   final String price;
   final String location;
   final String ownerName;
   final int locationId;
   final VoidCallback onContactPressed;
   final VoidCallback onRentPressed;
+  final String userImage;
 
   const RentalItemCardHistorique({
     Key? key,
+    required this.userImage,
     required this.locationId,
     required this.imageUrl,
     required this.title,
-    required this.description,
     required this.price,
     required this.location,
     required this.ownerName,
@@ -43,12 +46,26 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
   OffreLocation? _firstOffer;
   UserService userService = UserService();
   String? _username;
-
+  MinIOService minioService = MinIOService();
+  String? userProfileImage;
 
   @override
   void initState() {
     super.initState();
-    _loadOffers(); // Assurez-vous que cette méthode est appelée dans initState
+    _loadOffers();
+    _fetchUserProfileImage();
+  }
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      String objectName = widget.userImage.replaceFirst('images_', '');
+      String filePath = await minioService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userProfileImage = filePath;
+      });
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
   }
 
   Future<void> _loadUserName() async {
@@ -56,7 +73,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
       User user = await userService.findUserById(_firstOffer!.userId);
       String username = user.userName;
       setState(() {
-        _username = username; // Sauvegarder le nom d'utilisateur dans l'état du widget
+        _username = username;
       });
     }
   }
@@ -71,7 +88,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
         _offers = await offreLocationService.getOffersByLocationIdAndStatus(widget.locationId, 'accepted');
         if (_offers.isNotEmpty) {
           _firstOffer = _offers[0];
-          await _loadUserName(); // Chargement du nom d'utilisateur après l'obtention de la première offre
+          await _loadUserName();
         }
         setState(() {});
       } catch (e) {
@@ -103,7 +120,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
                   child: Image.asset(
                     "assets/images/demandeLocationImage.png",
                     width: double.infinity,
-                    height: 150.h,
+                    height: 200.h,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -115,13 +132,38 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 5.h),
-                Text(
-                  widget.description,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Color(0xFF585858),
-                  ),
+                SizedBox(height: 10.h),
+                Row(
+                  children: [
+                    Icon(Icons.book_online_outlined, color: Colors.blue,
+                        size: 18.sp),
+                    SizedBox(width: 5.w),
+                    Expanded(
+                      child: Text(
+                        widget.location,
+                        style: GoogleFonts.roboto(
+                          fontSize: 12.sp,
+                          color: Color(0xFF0C3469),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                Row(
+                  children: [
+                    Image.asset("assets/icons/tokenicon.png", width: 20),
+                    SizedBox(width: 4.w),
+                    Text(
+                      widget.price ,
+                      style: GoogleFonts.roboto(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 20.h),
                 Container(
@@ -139,8 +181,9 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
                           children: [
                             CircleAvatar(
                               radius: 18.r,
-                              backgroundImage: AssetImage(
-                                  "assets/images/img_6.png"),
+                              backgroundImage: userProfileImage != null
+                                  ? FileImage(File(userProfileImage!))
+                                  : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
@@ -156,34 +199,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
                                       color: Colors.grey[700],
                                     ),
                                   ),
-                                  Text(
-                                    widget.price.toString(),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
                                 ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10.h),
-                        // Location Section
-                        Row(
-                          children: [
-                            Icon(Icons.book_online_outlined, color: Colors.blue,
-                                size: 18.sp),
-                            SizedBox(width: 5.w),
-                            Expanded(
-                              child: Text(
-                                widget.location,
-                                style: GoogleFonts.roboto(
-                                  fontSize: 12.sp,
-                                  color: Color(0xFF0C3469),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -209,17 +225,17 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         width: 350.w,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.greenAccent,
           borderRadius: BorderRadius.circular(10.65.r),
         ),
         child: Padding(
           padding: EdgeInsets.all(8.w),
           child: Text(
-            'Aucune offre acceptée disponible.',
+            'Offre de location terminé',
             style: GoogleFonts.roboto(
               fontSize: 14.19.sp,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF585858),
+              color: Colors.black,
             ),
           ),
         ),

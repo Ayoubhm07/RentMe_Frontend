@@ -6,6 +6,9 @@ import 'package:khedma/Services/UserService.dart';
 import 'package:khedma/entities/Offre.dart';
 import 'package:khedma/entities/User.dart';
 
+import '../Card/ConfirmationNotficationCard.dart';
+import '../Card/SuccessNotificationCard.dart';
+
 class MyDemandOffersSection extends StatefulWidget {
   final List<Offre> offers;
 
@@ -194,70 +197,101 @@ class _MyDemandOffersSectionState extends State<MyDemandOffersSection> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm'),
-          content: Text('Do you want to accept this offer?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
+        return ConfirmationDialog(
+          message: 'Voulez-vous accepter cette offre ?',
+          logoPath: 'assets/images/logo.png',
+          onConfirm: () async {
+            Navigator.of(context).pop();
+            try {
+              await OffreService().acceptOffer(offre.id ?? 0);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Offre acceptée avec succès!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
                 Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () async {
-                Navigator.of(context).pop(); // Ferme la boîte de dialogue
-                try {
-                  await OffreService().acceptOffer(offre.id ?? 0); // Appel à la méthode acceptOffer
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Offre acceptée avec succès!'),
-                      backgroundColor: Colors.green,
-                    ),
+                Navigator.of(context).pop();
+              });
+            } catch (e) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors de l\'acceptation de l\'offre: $e',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
                   );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erreur lors de l\'acceptation de l\'offre: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop();
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
         );
       },
     );
   }
 
   void _showRejectDialog(BuildContext context, Offre offre) {
-    OffreService offreService = OffreService();
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm'),
-          content: Text('Do you want to reject this offer?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context). pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () async {
-                await offreService.deleteOffer(offre.id??0);
-                Navigator.of(context). pop();
-                Navigator.of(context).pop();
+        return ConfirmationDialog(
+          message: 'Voulez-vous rejeter cette offre ?',
+          logoPath: 'assets/images/logo.png',
+          onConfirm: () async {
+            Navigator.of(context).pop();
+            OffreService offreService = OffreService();
+            try {
+              await offreService.deleteOffer(offre.id ?? 0);
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Offre rejetée avec succès!',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/check1.png',
+                  );
                 },
-            ),
-          ],
+              );
+              Future.delayed(Duration(seconds: 1), () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              });
+            } catch (e) {
+              // Display error feedback
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SuccessDialog(
+                    message: 'Erreur lors du rejet de l\'offre: $e',
+                    logoPath: 'assets/images/logo.png',
+                    iconPath: 'assets/icons/echec.png',
+                  );
+                },
+              );
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.of(context).pop();
+              });
+            }
+          },
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
         );
       },
     );
   }
+
 }

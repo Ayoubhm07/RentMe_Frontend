@@ -15,6 +15,7 @@ import '../../entities/User.dart';
 import '../../theme/AppTheme.dart';
 import '../Buttons/IndependentButtonGroup.dart';
 import '../Buttons/MyButtons.dart';
+import '../Card/SuccessNotificationCard.dart';
 
 class CustomSwitch2 extends StatefulWidget {
   final List<String> buttonLabels;
@@ -34,7 +35,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
   bool showBudgetSlider = false;
   RangeValues _currentRangeValues = RangeValues(500, 5000);
   bool budgetUnder5000 =
-      true; // Par défaut, on suppose que le budget est sous 5000€
+      true;
 
   bool isYesSelected = false;
   bool isYesSelectedGroup1 = false;
@@ -366,7 +367,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
         if (snapshot.hasError) {
           return Center(child: Text("Failed to get username: ${snapshot.error}"));
         }
-        // Once data is available, use it in the ElevatedButton
+
         String ownerName = snapshot.data!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,19 +394,56 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                       addedDate: DateTime.now(),
                       userId: currentUser.id!,
                     );
-                    await demandeService.saveDemande(newDemand);
 
+                    try {
+                      await demandeService.saveDemande(newDemand);
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      // Show SuccessDialog
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SuccessDialog(
+                            message: 'Demande enregistrée avec succès !',
+                            logoPath: 'assets/images/logo.png',
+                            iconPath: 'assets/icons/check1.png',
+                          );
+                        },
+                      );
+                      Future.delayed(Duration(seconds: 2), () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      });
+
+                    } catch (error) {
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SuccessDialog(
+                            message: 'Erreur lors de l\'enregistrement de la demande !',
+                            logoPath: 'assets/images/logo.png',
+                            iconPath: 'assets/icons/echec.png',
+                          );
+                        },
+                      );
+                      Future.delayed(Duration(seconds: 2), () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      });
+                    }
+
+                  } else {
                     setState(() {
                       isLoading = false;
                     });
-                    ScaffoldMessenger.of(widget.context).showSnackBar(
-                      SnackBar(
-                        content: Text("Demande enregistrée avec succès !"),
-                        backgroundColor: Colors.green,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  } else {
+
+                    // Show SnackBar for validation errors
                     ScaffoldMessenger.of(widget.context).showSnackBar(
                       SnackBar(
                         content: Text("Veuillez remplir tous les champs !"),
@@ -416,8 +454,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                           label: 'OK',
                           textColor: Colors.white,
                           onPressed: () {
-                            ScaffoldMessenger.of(context)
-                                .hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           },
                         ),
                       ),
@@ -429,8 +466,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20), // Rayon
                   ),
-                  padding:
-                  EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
+                  padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
                 ),
                 child: Text(
                   'Terminer',
@@ -447,6 +483,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
       },
     );
   }
+
 
 
   Widget _buildCategorieSection() {
@@ -547,7 +584,6 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Prix Section
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -561,7 +597,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                   ),
                   SizedBox(height: 5),
                   SizedBox(
-                    width: 80.w, // Minimum width for the text field
+                    width: 80.w,
                     child: TextFormField(
                       controller: _prixcontroller,
                       decoration: InputDecoration(
@@ -666,13 +702,20 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                       setState(() {
                         isLoading = false;
                       });
-                      ScaffoldMessenger.of(widget.context).showSnackBar(
-                        SnackBar(
-                          content: Text("Location enregistrée avec succès !"),
-                          backgroundColor: Colors.green,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SuccessDialog(
+                            message: 'Demande de location ajoutée correctement',
+                            logoPath: 'assets/images/logo.png',
+                            iconPath: 'assets/icons/check1.png',
+                          );
+                        },
                       );
+                      Future.delayed(Duration(seconds: 2), () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      });
                     } else {
                       // show a snackbar
                       ScaffoldMessenger.of(widget.context).showSnackBar(
@@ -681,8 +724,6 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                           backgroundColor: Colors.redAccent,
                           behavior: SnackBarBehavior.fixed,
 
-                          // add a button to dismiss the snackbar
-                          // add time duration to dismiss the snackbar
                           duration: const Duration(seconds: 2),
                           action: SnackBarAction(
                             label: 'OK',
@@ -745,7 +786,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                   child: Padding(
                     padding: EdgeInsets.only(bottom: size * 0.1),
                     child: Image.asset(
-                      imagePath, // Utilisez le paramètre imagePath ici
+                      imagePath,
                       width: size * 0.4,
                       height: size * 0.4,
                     ),
@@ -759,7 +800,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                   width: size * 0.20,
                   height: size * 0.20,
                   decoration: BoxDecoration(
-                    color: color, // Utilisez le paramètre color ici
+                    color: color,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -805,7 +846,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
                   child: Padding(
                     padding: EdgeInsets.only(bottom: size * 0.1),
                     child: Image.asset(
-                      imagePath, // Use the parameter imagePath here
+                      imagePath,
                       width: size * 0.4,
                       height: size * 0.4,
                     ),
@@ -924,9 +965,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
         SizedBox(height: 10.h),
         TextField(
           controller: controller,
-          // Assure-toi d'utiliser le bon controller si besoin
           keyboardType: TextInputType.text,
-          // Personnalise si nécessaire pour chaque TextField
           decoration: InputDecoration(
             hintText: hintText,
             // Hint personnalisé
@@ -939,74 +978,6 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildBudgetSlider() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Budget :',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        SizedBox(height: 10.h),
-        Row(
-          children: [
-            // Label Min
-            SizedBox(
-              width: 50.w, // Ajustez la largeur selon vos besoins
-              child: Text(
-                'Min',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Color(0xFF000000),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            Expanded(
-              child: RangeSlider(
-                values: _currentRangeValues,
-                min: 0,
-                max: 5000,
-                divisions: 10,
-                labels: RangeLabels(
-                  _currentRangeValues.start.toStringAsFixed(0) + '€',
-                  _currentRangeValues.end.toStringAsFixed(0) + '€',
-                ),
-                onChanged: (RangeValues values) {
-                  setState(() {
-                    _currentRangeValues = values;
-                    budgetUnder5000 =
-                        values.start <= 5000 && values.end <= 5000;
-                  });
-                },
-              ),
-            ),
-            // Label Max
-            SizedBox(
-              width: 50.w, // Ajustez la largeur selon vos besoins
-              child: Text(
-                'Max',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Color(0xFF000000),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10.h),
       ],
     );
   }

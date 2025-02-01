@@ -1,17 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:khedma/Services/SharedPrefService.dart';
+import 'package:khedma/Services/UserService.dart';
 
+import '../../entities/User.dart';
 import '../../theme/AppTheme.dart';
 
+class VerificationPageController {
+  final List<TextEditingController> _controllers =
+  List.generate(4, (index) => TextEditingController());
 
-class VerificationPage extends StatelessWidget {
-  final List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  SharedPrefService sharedPrefService = SharedPrefService();
+  UserService userService = UserService();
 
+  Future<Map<String, dynamic>> validate() async {
+    String errorMessage = '';
+    Map<String, dynamic> result = {};
+    int code = 0;
+    try {
+      code = int.parse(_controllers.map((e) => e.text).join());
+    } on FormatException {
+      errorMessage = 'Veuillez entrer un code de 4 chiffres';
+      result = {'error': true, 'message': errorMessage};
+      return result;
+    }
+    if (code.toString().length < 4) {
+      errorMessage = 'Veuillez entrer un code de 4 chiffres';
+      result = {'error': true, 'message': errorMessage};
+      return result;
+    } else {
+      await sharedPrefService.checkAllValues();
+      User user = await sharedPrefService.getUser();
+      String response = await userService.verifyNumber(
+          user.id!, int.parse(_controllers.map((e) => e.text).join()));
+      if (response != 'Code verified') {
+        result = {'error': true, 'message': response};
+        return result;
+      }
+    }
+    return result;
+  }
+}
+
+class VerificationPage extends StatefulWidget {
+  final VerificationPageController controller;
+
+  const VerificationPage({Key? key, required this.controller})
+      : super(key: key);
+
+  @override
+  VerificationPageState createState() => VerificationPageState();
+}
+
+class VerificationPageState extends State<VerificationPage> {
+  late UserService userService;
+  late SharedPrefService sharedPrefService;
+
+  @override
+  void initState() {
+    super.initState();
+    sharedPrefService = SharedPrefService();
+    userService = UserService();
+  }
+  resendVerificationCode() async {
+    User user = await sharedPrefService.getUser();
+    String response = await userService.sendSMS(user.email);
+    print(response);
+  }
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(
       context,
-      designSize: Size(375, 812), // Taille de conception de base (largeur, hauteur)
+      designSize:
+      Size(375, 812), // Taille de conception de base (largeur, hauteur)
     );
 
     return Scaffold(
@@ -61,21 +122,25 @@ class VerificationPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(4, (index) {
                         return Container(
-                          width: 0.12.sw, // Adjusted to be proportional to screen width
-                          height: 0.12.sw, // Keeping it square by using same proportion
+                          width: 0.12.sw,
+                          // Adjusted to be proportional to screen width
+                          height: 0.12.sw,
+                          // Keeping it square by using same proportion
                           child: TextField(
-                            controller: _controllers[index],
+                            controller: widget.controller._controllers[index],
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 24.sp),
                             keyboardType: TextInputType.number,
                             maxLength: 1,
                             decoration: InputDecoration(
                               counterText: '',
-                              fillColor: AppTheme.grisTextField, // Background color of the text field
+                              fillColor: AppTheme.grisTextField,
+                              // Background color of the text field
                               filled: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.r),
-                                borderSide: BorderSide(color: AppTheme.primaryColor),
+                                borderSide:
+                                BorderSide(color: AppTheme.primaryColor),
                               ),
                             ),
                           ),
@@ -85,7 +150,7 @@ class VerificationPage extends StatelessWidget {
                     SizedBox(height: 16.h),
                     TextButton(
                       onPressed: () {
-                        // Action d'envoi d'un autre code
+                        resendVerificationCode();
                       },
                       child: Text(
                         'Envoyer un autre code',

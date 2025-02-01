@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AcceptedOfferCard extends StatelessWidget {
+  final String userImage;
   final String imageUrl;
   final String title;
   final String description;
@@ -18,6 +21,7 @@ class AcceptedOfferCard extends StatelessWidget {
 
   const AcceptedOfferCard({
     Key? key,
+    required this.userImage,
     required this.imageUrl,
     required this.description,
     required this.title,
@@ -99,7 +103,9 @@ class AcceptedOfferCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18.r,
-                      backgroundImage: AssetImage("assets/images/img_6.png"),
+                      backgroundImage: userImage != null
+                          ? FileImage(File(userImage!))
+                          : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                     ),
                     SizedBox(width: 8.w),
                     Expanded(

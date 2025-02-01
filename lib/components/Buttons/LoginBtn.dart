@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:khedma/screens/MainPages/HomePage.dart';
+import 'package:khedma/screens/MainPages/Home/HomePage.dart';
 
 import '../../theme/AppTheme.dart';
 

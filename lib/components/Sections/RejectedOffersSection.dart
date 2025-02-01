@@ -2,23 +2,56 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:khedma/Services/DemandeService.dart';
+import 'package:khedma/Services/MinIOService.dart';
+import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/components/Card/RejectedOfferCard.dart';
 import 'package:khedma/entities/Demand.dart';
 import 'package:khedma/entities/User.dart';
 import '../../Services/OffreService.dart';
 import '../../entities/Offre.dart';
+import '../../entities/ProfileDetails.dart';
 import '../Card/CardOffre.dart';
 
-class RejectedOffersSection extends StatelessWidget {
+
+
+class RejectedOffersSection extends StatefulWidget {
   final OffreService offreService;
+  RejectedOffersSection({Key? key, required this.offreService}) : super(key: key);
+  @override
+  _RejectedOffersSectionState createState() => _RejectedOffersSectionState();
+}
+class _RejectedOffersSectionState extends State<RejectedOffersSection> {
   final DemandeService demandeService = DemandeService();
   final SharedPrefService sharedPrefService = SharedPrefService();
+  final MinIOService minIOService = MinIOService();
+  final ProfileService profileService = ProfileService();
+  String? userImage ;
 
-  RejectedOffersSection({Key? key, required this.offreService}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfileImage();
+  }
 
-  Future<List<Offre>> _fetchPendingOffers() {
-    return offreService.getOffersByUserIdAndStatus(6, 'rejected');
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      User user = await sharedPrefService.getUser();
+      ProfileDetails profileDetails = await profileService.getProfileDetails(user.id ?? 0);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
+
+  Future<List<Offre>> _fetchPendingOffers() async {
+    User user = await sharedPrefService.getUser();
+    return widget.offreService.getOffersByUserIdAndStatus(user.id ?? 0, 'rejected');
   }
 
   Future<Demand?> _fetchDemand(int demandId) async {
@@ -85,6 +118,7 @@ class RejectedOffersSection extends StatelessWidget {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return RejectedOffreCard(
+                            userImage: userImage ?? "",
                             imageUrl: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),

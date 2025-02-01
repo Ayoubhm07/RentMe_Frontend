@@ -8,14 +8,42 @@ import 'package:khedma/entities/OffreLocation.dart';
 import 'package:khedma/entities/User.dart';
 import 'package:khedma/theme/AppTheme.dart';
 
+import '../Card/SuccessNotificationCard.dart';
+
 void showAddLocationOffreBottomSheet(BuildContext context, int locationId, String timeUnit) async {
   OffreLocationService offreLocationService = OffreLocationService();
+  SharedPrefService sharedPrefService = SharedPrefService();
   int price = 20;
   int duration = 1;
   String durationType = timeUnit;
 
   try {
-    User user = await SharedPrefService().getUser();
+    User user = await sharedPrefService.getUser();
+    int userId = user.id ?? 0;
+
+    List<OffreLocation> existingOffers = await offreLocationService.getOffersByLocation(locationId);
+
+    bool hasUserPostedOffer = existingOffers.any((offer) => offer.userId == userId);
+
+    if (hasUserPostedOffer) {
+      // Show a SuccessDialog informing the user
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SuccessDialog(
+            message: 'Vous avez déjà soumis une offre pour cette location.',
+            logoPath: 'assets/images/logo.png',
+            iconPath: 'assets/icons/echec.png',
+          );
+        },
+      );
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pop(context); // Close SuccessDialog
+      });
+      return; // Exit the function to prevent further actions
+    }
+
+    // Show the modal bottom sheet for adding a new offer
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -44,7 +72,7 @@ void showAddLocationOffreBottomSheet(BuildContext context, int locationId, Strin
                     decoration: InputDecoration(
                       labelText: 'Montant de l\'offre',
                       suffixIcon: Padding(
-                        padding: EdgeInsets.only(right: 8.0), // Optional: Adjust padding as needed
+                        padding: EdgeInsets.only(right: 8.0),
                         child: Image.asset("assets/icons/coins.png", width: 24, height: 24),
                       ),
                       border: OutlineInputBorder(
@@ -76,7 +104,7 @@ void showAddLocationOffreBottomSheet(BuildContext context, int locationId, Strin
                       ),
                       SizedBox(width: 10.w),
                       DropdownButton<String>(
-                        value: durationType,
+                        value: (['heures', 'jours', 'mois'].contains(durationType)) ? durationType : 'jours',
                         items: <String>['heures', 'jours', 'mois'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -104,18 +132,41 @@ void showAddLocationOffreBottomSheet(BuildContext context, int locationId, Strin
                           periode: "$duration $durationType",
                           acceptedAt: DateTime.now(),
                           finishedAt: DateTime.now(),
-                          userId: user.id ?? 0,
+                          userId: userId,
                         );
                         await offreLocationService.createOffer(newOffer);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Offer successfully submitted!'))
+
+                        // Show success dialog
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SuccessDialog(
+                              message: 'Offre de location ajoutée correctement.',
+                              logoPath: 'assets/images/logo.png',
+                              iconPath: 'assets/icons/check1.png',
+                            );
+                          },
                         );
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pop(context); // Close SuccessDialog
+                          Navigator.pop(context); // Close BottomSheet
+                        });
                       } catch (e) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error submitting offer: $e'))
+                        // Show error dialog
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SuccessDialog(
+                              message: 'Problème lors de l\'ajout de votre offre!',
+                              logoPath: 'assets/images/logo.png',
+                              iconPath: 'assets/icons/echec.png',
+                            );
+                          },
                         );
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pop(context); // Close ErrorDialog
+                          Navigator.pop(context); // Close BottomSheet
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -126,7 +177,7 @@ void showAddLocationOffreBottomSheet(BuildContext context, int locationId, Strin
                       padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
                     ),
                     child: Text(
-                      'Submit',
+                      'Soumettre',
                       style: GoogleFonts.roboto(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,

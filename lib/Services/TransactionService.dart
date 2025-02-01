@@ -9,7 +9,7 @@ class TransactionService {
 
   Future<String> getOnboardingLink(String accountId) async {
     final url = Uri.parse('$_baseUrl/onboarding-link/$accountId');
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.get(url, headers: {
         'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ class TransactionService {
 
   Future<String> buyTokens(TransactionDTO transaction) async {
     final url = Uri.parse('$_baseUrl/buy-tokens');
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       print(accessToken);
       final response = await http.post(url,
@@ -49,7 +49,7 @@ class TransactionService {
 
   Future<String> pay(int idClient, int idWorker, int tokens) async {
     final url = Uri.parse('$_baseUrl/pay/$idClient/$idWorker/$tokens');
-    String accessToken = await sharedPrefService.readUserData('accessToken');
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
 
       final response = await http.put(url,
         headers: {
@@ -65,8 +65,7 @@ class TransactionService {
 
   Future<String> workerPayout(int userId, int tokens) async {
     final url = Uri.parse('$_baseUrl/worker-payout/$userId/$tokens');
-    String accessToken = await sharedPrefService.readUserData('accessToken');
-
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
       final response = await http.post(url,
         headers: {

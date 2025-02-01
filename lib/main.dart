@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:khedma/components/Stepper/ProfileStepper.dart';
 import 'package:khedma/screens/Login.dart';
-import 'package:khedma/screens/MainPages/HomePage.dart';
+import 'package:khedma/screens/MainPages/Home/HomePage.dart';
 import 'package:khedma/screens/onboardings/spalshScreen.dart';
 import 'package:khedma/theme/AppTheme.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';

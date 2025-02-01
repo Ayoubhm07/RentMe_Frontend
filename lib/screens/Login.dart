@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/components/Stepper/CustomStepper.dart';
-import 'package:khedma/screens/MainPages/HomePage.dart';
+import 'package:khedma/screens/MainPages/Home/HomePage.dart';
+import 'package:khedma/screens/ResetPassword.dart';
 
 
 import '../Services/UserService.dart';
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     bool isfinished = false;
     bool isAuthenticated = await us.authenticate(email, password);
     if (isAuthenticated) {
-       isfinished = await us.getCurrentUserByUsername();
+      isfinished = await us.getCurrentUserByUsername();
       if(isfinished){
         print('User authenticated successfully');
         Navigator.pushReplacement(
@@ -132,7 +133,12 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.only(right: 40.w),
                         child: GestureDetector(
                           onTap: () {
-                            // Handle "mot de passe oublié?" action
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ResetPasswordWidget(),
+                              ),
+                            );
                           },
                           child: Text(
                             'mot de passe oublié?',

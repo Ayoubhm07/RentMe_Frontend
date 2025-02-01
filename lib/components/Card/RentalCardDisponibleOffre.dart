@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:khedma/Services/MinIOService.dart';
 
 import '../../theme/AppTheme.dart';
 import '../RentalItemDetailPage.dart';
@@ -47,14 +49,32 @@ class RentalItemCardDisponibleOffre extends StatefulWidget {
 }
 
 class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponibleOffre> {
-  bool _showProposeButton = false;
   int period = 1;
   int price = 20;
+
+  MinIOService minIOService = MinIOService();
+  String? userProfileImage;
+
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      String objectName = widget.userImage.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userProfileImage = filePath;
+      });
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
+
+
+
   @override
   void initState() {
     super.initState();
+    _fetchUserProfileImage();
   }
-  bool _showOfferText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +89,7 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
               imageUrl: widget.imageUrl,
               userEmail: widget.userEmail,
               phoneNumber: widget.phoneNumber,
-              userImage: widget.userImage,
+              userImage: userProfileImage ?? "",
               title: widget.title,
               date: widget.date,
               evalue: widget.evalue,
@@ -82,18 +102,20 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
         );
       },
       child: Card(
-        margin: EdgeInsets.all(8.w),
+        margin: EdgeInsets.all(10.w),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.r),
         ),
-        color: Colors.white,
+        elevation: 5,
+        shadowColor: Colors.grey.withOpacity(0.3),
         child: Padding(
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.all(14.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Image section
               ClipRRect(
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(12.r),
                 child: Image.asset(
                   widget.imageUrl,
                   width: double.infinity,
@@ -101,59 +123,65 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 10.h),
+              // Profile picture and owner name
               Row(
                 children: [
                   CircleAvatar(
-                    radius: 18.r,
-                    backgroundImage: FileImage(File(widget.userImage)),
+                    radius: 22.r,
+                    backgroundImage: userProfileImage != null
+                        ? FileImage(File(userProfileImage!))
+                        : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       widget.ownerName,
                       style: GoogleFonts.roboto(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 12.h),
+              // Title
               Text(
                 widget.title,
                 style: GoogleFonts.roboto(
-                  fontSize: 18.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 8.h),
+              // Date and description
               Row(
                 children: [
-                  Icon(Icons.date_range, color: Colors.blue),
-                  SizedBox(width: 8.w),
+                  Icon(Icons.date_range, color: Colors.blue, size: 18.sp),
+                  SizedBox(width: 6.w),
                   Text(
                     widget.date,
                     style: GoogleFonts.roboto(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       color: Colors.grey[600],
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 8.h),
               Row(
                 children: [
-                  Icon(Icons.description, color: Colors.blue),
-                  SizedBox(width: 8.w),
+                  Icon(Icons.description, color: Colors.blue, size: 18.sp),
+                  SizedBox(width: 6.w),
                   Expanded(
                     child: Text(
                       widget.description,
                       style: GoogleFonts.roboto(
                         fontSize: 14.sp,
-                        color: Colors.grey[800],
+                        color: Colors.grey[700],
                       ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
@@ -161,33 +189,38 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
                   ),
                 ],
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 10.h),
+              // Budget section
               Row(
                 children: [
-                  Image.asset("assets/icons/tokenicon.png", width: 20),
-                  SizedBox(width: 8.w),
+                  Image.asset("assets/icons/tokenicon.png", width: 22.w),
+                  SizedBox(width: 6.w),
                   Text(
                     "Budget: ${widget.budget.toStringAsFixed(2)}",
                     style: GoogleFonts.roboto(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.statut,
-                    style: GoogleFonts.roboto(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: widget.statut == 'open' ? Colors.green : Colors.red,
-                    ),
+              SizedBox(height: 10.h),
+              // Status
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: widget.statut == 'open' ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  widget.statut.toUpperCase(),
+                  style: GoogleFonts.roboto(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                    color: widget.statut == 'open' ? Colors.green : Colors.red,
                   ),
-                ],
+                ),
               ),
             ],
           ),
