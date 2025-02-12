@@ -3,12 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/components/Stepper/CustomStepper.dart';
 import 'package:khedma/screens/MainPages/Home/HomePage.dart';
-import 'package:khedma/screens/ResetPassword.dart';
 
 
 import '../Services/UserService.dart';
 import '../components/Buttons/LoginBtn.dart';
 import '../theme/AppTheme.dart';
+import 'ResetPassword/ResetPasswordWidget.dart';
 
 class LoginPage extends StatefulWidget {
   @override
