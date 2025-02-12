@@ -46,10 +46,10 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
             title: "RentMe",
-            // home: SplashPage());
+            home: SplashPage(),
             //home: HomeScreen());
             //home: ProfileStepper()
-            home: LoginPage(),
+            //home: LoginPage(),
         );
       },
     );

@@ -4,16 +4,62 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../Services/ConversationAndMessageService.dart';
 import '../../Services/OffreLocationService.dart';
+import '../../Services/UserService.dart';
+import '../../entities/Conversation.dart';
 import '../../entities/OffreLocation.dart';
+import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 import 'ConfirmationNotficationCard.dart';
 import 'SuccessNotificationCard.dart';
 
 class OfferDetailsCard extends StatelessWidget {
   final OffreLocation offer;
   final String username;
+  final int userId;
 
-  OfferDetailsCard({Key? key, required this.offer, required this.username}) : super(key: key);
+  OfferDetailsCard({Key? key, required this.offer, required this.username, required this.userId}) : super(key: key);
+
+
+
+  Future<void> _handleMessageClick(BuildContext context, {required int senderId, required int receiverId}) async {
+    try {
+      User currentUser = await UserService().findUserById(senderId);
+      User receiver = await UserService().findUserById(receiverId);
+
+      if (senderId == null || receiverId == null) {
+        throw Exception("senderId ou receiverId est null");
+      }
+
+      ConversationAndMessageService service = ConversationAndMessageService();
+      Conversation conversation = await service.createConversation(
+        senderId,
+        [receiverId],
+      );
+
+      int conversationId = conversation.id;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatMessagePage(
+            conversationId: conversationId,
+            receiver: receiver,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Erreur lors de la création de la conversation: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de la création de la conversation: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 
   Future<void> terminerOffre(BuildContext context, int id) async {
     final offreLocationService = OffreLocationService();
@@ -105,7 +151,8 @@ class OfferDetailsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
+                    await _handleMessageClick(context, senderId: userId, receiverId: offer.userId);
                   },
                   icon: Icon(Icons.chat, color: Colors.green[800]),
                   label: Text('Contacter le client'),

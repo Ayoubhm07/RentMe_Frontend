@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/components/RentalItemMyDemandDetails.dart';
 
 class RentalItemCardMyDemand extends StatefulWidget {
+  final int userId;
   final int demandId;
   final String imageUrl;
   final String title;
@@ -20,6 +21,7 @@ class RentalItemCardMyDemand extends StatefulWidget {
 
   const RentalItemCardMyDemand({
     Key? key,
+    required this.userId,
     required this.userImage,
     required this.demandId,
     required this.imageUrl,
@@ -47,6 +49,7 @@ class _RentalItemCardMyDemandState extends State<RentalItemCardMyDemand> {
           context,
           MaterialPageRoute(
             builder: (context) => RentalItemMyDemandDetails(
+              userId : widget.userId,
               demandId: widget.demandId,
               description: widget.description,
               imageUrl: widget.imageUrl,

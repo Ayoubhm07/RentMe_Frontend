@@ -188,42 +188,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 20.h),
-                    Text(
-                      'Ou',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.secondaryColor,
-                        fontSize: 18.sp,
-                      ),
-                    ),
-                    SizedBox(height: 10.h),
-                    SizedBox(
-                      width: 145.w,
-                      height: 52.h,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/img_2.png',
-                            width: 37.w,
-                            height: 36.h,
-                          ),
-                          SizedBox(width: 10.w),
-                          Image.asset(
-                            'assets/images/img_1.png',
-                            width: 36.w,
-                            height: 36.h,
-                          ),
-                          SizedBox(width: 10.w),
-                          Image.asset(
-                            'assets/images/facebook.png',
-                            width: 52.w,
-                            height: 52.h,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
                   ],
                 ),
               ),

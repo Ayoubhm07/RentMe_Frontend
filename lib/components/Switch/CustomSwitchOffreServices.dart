@@ -174,6 +174,7 @@ class _CustomSwitchOffreServicesState extends State<CustomSwitchOffreServices> {
             itemBuilder: (context, index) {
               Demand demand = snapshot.data![index];
               return RentalItemCardMyDemand(
+                userId : demand.userId,
                 demandId: demand.id ?? 0,
                 description: demand.description,
                 imageUrl: 'assets/images/menage.jpeg',

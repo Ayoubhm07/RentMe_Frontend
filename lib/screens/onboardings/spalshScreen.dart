@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'AllBordings.dart';
+import 'AllBordings.dart'; // Assurez-vous que ce fichier existe
 
 class SplashPage extends StatefulWidget {
   @override
@@ -8,7 +8,6 @@ class SplashPage extends StatefulWidget {
 }
 
 class StartState extends State<SplashPage> {
-
   @override
   void initState() {
     super.initState();

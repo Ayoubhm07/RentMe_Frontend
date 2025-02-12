@@ -5,9 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../Services/ConversationAndMessageService.dart';
 import '../../Services/MinIOService.dart';
+import '../../Services/UserService.dart';
+import '../../entities/Conversation.dart';
+import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 
 class AcceptedOfferCard extends StatefulWidget {
+  final int userId ;
+  final int receiverId;
   final String userImage;
   final String images;
   final int locationId;
@@ -25,6 +32,8 @@ class AcceptedOfferCard extends StatefulWidget {
 
   const AcceptedOfferCard({
     Key? key,
+    required this.userId,
+    required this.receiverId,
     required this.userImage,
     required this.images,
     required this.locationId,
@@ -49,6 +58,44 @@ class _AcceptedOfferCardState extends State<AcceptedOfferCard> {
   MinIOService minioService = MinIOService();
   List<String> imageUrls = [];
   int _currentImageIndex = 0;
+
+  Future<void> _handleMessageClick(BuildContext context, {required int senderId, required int receiverId}) async {
+    try {
+      User currentUser = await UserService().findUserById(senderId);
+      User receiver = await UserService().findUserById(receiverId);
+
+      if (senderId == null || receiverId == null) {
+        throw Exception("senderId ou receiverId est null");
+      }
+
+      ConversationAndMessageService service = ConversationAndMessageService();
+      Conversation conversation = await service.createConversation(
+        senderId,
+        [receiverId],
+      );
+
+      int conversationId = conversation.id;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatMessagePage(
+            conversationId: conversationId,
+            receiver: receiver,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Erreur lors de la création de la conversation: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de la création de la conversation: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 
   Future<void> _loadLocationImages() async {
     try {
@@ -232,7 +279,9 @@ class _AcceptedOfferCardState extends State<AcceptedOfferCard> {
                     ),
                     IconButton(
                       icon: Icon(Icons.chat, color: Colors.blue[300], size: 24.sp),
-                      onPressed: widget.onChatPressed,
+                      onPressed: () async {
+                        await _handleMessageClick(context, senderId: widget.userId, receiverId: widget.receiverId);
+                      },
                     ),
                   ],
                 ),

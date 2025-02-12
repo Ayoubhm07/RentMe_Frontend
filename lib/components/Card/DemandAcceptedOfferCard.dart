@@ -1,10 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../Services/ConversationAndMessageService.dart';
+import '../../Services/MinIOService.dart';
+import '../../Services/ProfileService.dart';
+import '../../Services/UserService.dart';
+import '../../entities/Conversation.dart';
+import '../../entities/ProfileDetails.dart';
+import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 import 'PaymentConfirmation.dart';
 
 class DemandAcceptedOfferCard extends StatefulWidget {
+  final int userId;
   final int benifId;
   final String userName;
   final String userImage;
@@ -14,6 +26,7 @@ class DemandAcceptedOfferCard extends StatefulWidget {
   final int demandId;
   const DemandAcceptedOfferCard({
     Key? key,
+    required this.userId,
     required this.benifId,
     required this.demandId,
     required this.userName,
@@ -28,6 +41,69 @@ class DemandAcceptedOfferCard extends StatefulWidget {
 }
 
 class _DemandAcceptedOfferCardState extends State<DemandAcceptedOfferCard> {
+  final ProfileService profileService = ProfileService();
+  final MinIOService minIOService = MinIOService();
+  String? userImage;
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      ProfileDetails profileDetails2 = await profileService.getProfileDetails(widget.benifId);
+      String objectName = profileDetails2.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfileImage();
+  }
+
+  Future<void> _handleMessageClick(BuildContext context, {required int senderId, required int receiverId}) async {
+    try {
+      User currentUser = await UserService().findUserById(senderId);
+      User receiver = await UserService().findUserById(receiverId);
+
+      if (senderId == null || receiverId == null) {
+        throw Exception("senderId ou receiverId est null");
+      }
+
+      ConversationAndMessageService service = ConversationAndMessageService();
+      Conversation conversation = await service.createConversation(
+        senderId,
+        [receiverId],
+      );
+
+      int conversationId = conversation.id;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatMessagePage(
+            conversationId: conversationId,
+            receiver: receiver,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Erreur lors de la création de la conversation: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de la création de la conversation: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -69,8 +145,10 @@ class _DemandAcceptedOfferCardState extends State<DemandAcceptedOfferCard> {
           Row(
             children: [
               CircleAvatar(
-                backgroundImage: NetworkImage(widget.userImage),
-                radius: 25,
+                radius: 20.r,
+                backgroundImage: userImage != null
+                    ? FileImage(File(userImage!))
+                    : AssetImage("assets/images/default_avatar.png") as ImageProvider,
               ),
               SizedBox(width: 8),
               Expanded(
@@ -93,9 +171,15 @@ class _DemandAcceptedOfferCardState extends State<DemandAcceptedOfferCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildActionButton('Chat', Icons.chat, Colors.green[700]!, () {
-                print('Chat button pressed');
-              }),
+              _buildActionButton(
+                'Chat', // Titre du bouton
+                Icons.chat, // Icône du bouton
+                Colors.green[700]!, // Couleur du bouton
+                    () async {
+                  print('Chat button pressed');
+                  await _handleMessageClick(context, senderId: widget.userId, receiverId: widget.benifId);
+                },
+              ),
               _buildActionButton('Payer', Icons.payment, Colors.blue[800]!, () {
                 showModalBottomSheet(
                   context: context,

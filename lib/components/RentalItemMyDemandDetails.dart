@@ -24,6 +24,7 @@ import 'appBar/appBar.dart';
 import '../components/Sheets/showBottomSheet.dart';
 
 class RentalItemMyDemandDetails extends StatelessWidget {
+  final int userId;
   final int demandId;
   final String imageUrl;
   final String title;
@@ -37,6 +38,7 @@ class RentalItemMyDemandDetails extends StatelessWidget {
 
   const RentalItemMyDemandDetails({
     Key? key,
+    required this.userId,
     required this.demandId,
     required this.imageUrl,
     required this.title,
@@ -127,6 +129,7 @@ class RentalItemMyDemandDetails extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildDemandDetailsCard(BuildContext context) {
     return Card(
@@ -386,6 +389,7 @@ class RentalItemMyDemandDetails extends StatelessWidget {
                               return Text('Error fetching user: ${userSnapshot.error}');
                             } else if (userSnapshot.hasData) {
                               return DemandAcceptedOfferCard(
+                                userId: userId,
                                 benifId: acceptedOffer.userId,
                                 userName: userSnapshot.data!.userName,
                                 userImage: "",

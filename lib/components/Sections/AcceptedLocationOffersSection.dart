@@ -121,6 +121,8 @@ class _AcceptedLocationOffersSectionState extends State<AcceptedLocationOffersSe
                         } else {
                           Location demand = demandSnapshot.data!;
                           return AcceptedOfferCard(
+                            userId: user.id ?? 0,
+                            receiverId: demand.userId,
                             userImage: userImage ?? "",
                             images: demand.images,
                             locationId: demand.id ?? 0,

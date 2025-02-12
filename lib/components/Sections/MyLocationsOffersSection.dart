@@ -59,6 +59,7 @@ class MyLocationsOffersSection extends StatelessWidget {
                           Location location = snapshot.data![index];
                           return location.status == LocationStatus.NON
                               ? RentalItemCardHistorique(
+                            userId : location.userId,
                             locationId: location.id ?? 0,
                             images: location.images,
                             title: location.description,
@@ -70,6 +71,7 @@ class MyLocationsOffersSection extends StatelessWidget {
                             onRentPressed: () {},
                           )
                               : RentalItemCardHistorique2(
+                            userId : location.userId,
                             timeUnit: location.timeUnit,
                             locationId: location.id ?? 0,
                             category: location.category,

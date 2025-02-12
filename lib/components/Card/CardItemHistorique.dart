@@ -7,15 +7,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../Services/ConversationAndMessageService.dart';
 import '../../Services/MinIOService.dart';
 import '../../Services/OffreLocationService.dart';
 import '../../Services/UserService.dart';
+import '../../entities/Conversation.dart';
 import '../../entities/OffreLocation.dart';
 import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 import 'AcceptedOfferDetailsCard.dart';
 
 
 class RentalItemCardHistorique extends StatefulWidget {
+  final int userId;
   final String images;
   final String title;
   final String price;
@@ -28,6 +32,7 @@ class RentalItemCardHistorique extends StatefulWidget {
 
   const RentalItemCardHistorique({
     Key? key,
+    required this.userId,
     required this.userImage,
     required this.locationId,
     required this.images,
@@ -52,6 +57,8 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
   String? userProfileImage;
   List<String> imageUrls = [];
   int _currentImageIndex = 0;
+
+
 
   Future<void> _loadLocationImages() async {
     try {
@@ -308,7 +315,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
 
         ),
         sousCard(),
-        if (_firstOffer != null) OfferDetailsCard(offer: _firstOffer!, username: _username!),
+        if (_firstOffer != null) OfferDetailsCard(offer: _firstOffer!, username: _username!, userId : widget.userId),
       ],
 
     );

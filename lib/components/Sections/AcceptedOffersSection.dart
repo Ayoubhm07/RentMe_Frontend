@@ -122,6 +122,8 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return AcceptedOfferCard(
+                            userId: user.id ?? 0,
+                            receiverId: demand.userId,
                             locationId: demand.id ??0,
                             userImage: userImage ?? "",
                             images: 'https://example.com/image1.png',
@@ -134,8 +136,7 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                             duree: offre.periode,
                             budget: offre.price.toString()+"€",
                             onTerminerPressed: () {
-                              final parentContext = context; // Capture the parent context
-
+                              final parentContext = context;
                               showDialog(
                                 context: parentContext,
                                 builder: (BuildContext context) {

@@ -20,9 +20,10 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
+  final RateService rateService = RateService();
+
   final ProfileService profileService = ProfileService();
   final MinIOService minIOService = MinIOService();
-  final RateService rateService = RateService();
   String? userImage;
 
   Future<void> _fetchUserProfileImage() async {

@@ -15,12 +15,16 @@ import 'package:khedma/Services/OffreService.dart';
 import 'package:khedma/Services/UserService.dart';
 import 'package:khedma/entities/OffreLocation.dart';
 
+import '../../Services/ConversationAndMessageService.dart';
+import '../../entities/Conversation.dart';
 import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 import '../Sheets/ShowModifyLocationBottomSheet.dart';
 import 'ConfirmationNotficationCard.dart';
 import 'SuccessNotificationCard.dart';
 
 class RentalItemCardHistorique2 extends StatefulWidget {
+  final int userId;
   final String images;
   final String title;
   final String category;
@@ -33,6 +37,7 @@ class RentalItemCardHistorique2 extends StatefulWidget {
 
   const RentalItemCardHistorique2({
     Key? key,
+    required this.userId,
     required this.userImage,
     required this.images,
     required this.title,
@@ -62,6 +67,42 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
   int _currentImageIndex = 0;
 
 
+  Future<void> _handleMessageClick(BuildContext context, {required int senderId, required int receiverId}) async {
+    try {
+      User currentUser = await UserService().findUserById(senderId);
+      User receiver = await UserService().findUserById(receiverId);
+
+      if (senderId == null || receiverId == null) {
+        throw Exception("senderId ou receiverId est null");
+      }
+
+      ConversationAndMessageService service = ConversationAndMessageService();
+      Conversation conversation = await service.createConversation(
+        senderId,
+        [receiverId],
+      );
+
+      int conversationId = conversation.id;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatMessagePage(
+            conversationId: conversationId,
+            receiver: receiver,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Erreur lors de la création de la conversation: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de la création de la conversation: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   Future<void> _loadLocationImages() async {
     try {
@@ -569,8 +610,8 @@ class _RentalItemCardHistorique2State extends State<RentalItemCardHistorique2> {
                                   icon: Icons.chat_bubble_outline,
                                   color: Colors.blue,
                                   tooltip: 'Contactez le postulant',
-                                  onPressed: () {
-                                    // Logic to contact the offer poster
+                                  onPressed: () async {
+                                    await _handleMessageClick(context, senderId: widget.userId, receiverId: offer.userId);
                                   },
                                 ),
                               ],
