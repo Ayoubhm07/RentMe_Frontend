@@ -144,12 +144,15 @@ class _RentalItemCardDisponibleOffreState extends State<RentalItemCardDisponible
               children: [
                 // Image section
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Image.asset(
-                    widget.imageUrl,
-                    width: double.infinity,
-                    height: 150.h,
-                    fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Container(
+                    color: Colors.black12, // Fond blanc
+                    child: Image.asset(
+                      "assets/images/logo.png",
+                      width: double.infinity,
+                      height: 200.h,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 SizedBox(height: 10.h),

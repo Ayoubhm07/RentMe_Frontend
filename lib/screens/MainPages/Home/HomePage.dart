@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: CustomAppBar(
         notificationIcon: Icon(Icons.notifications, color: Colors.white),
         title: 'Accueil',
-        showSearchBar: true,
+        showSearchBar: false,
         backgroundColor: Color(0xFF0099D6),
       ),
       body: SingleChildScrollView(

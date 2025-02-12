@@ -49,11 +49,14 @@ class CardOffreEnCours extends StatelessWidget {
                 // Image Section
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10.r),
-                  child: Image.asset(
-                    "assets/images/menage.jpeg",
-                    width: double.infinity,
-                    height: 150.h,
-                    fit: BoxFit.cover,
+                  child: Container(
+                    color: Colors.white, // Fond blanc
+                    child: Image.asset(
+                      "assets/images/logo.png",
+                      width: double.infinity,
+                      height: 200.h,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 SizedBox(height: 10.h),

@@ -106,52 +106,6 @@ class _BanierePublicitaireState extends State<BanierePublicitaire> {
     }
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return ConfirmationDialog(
-          message: 'Publiez votre produit pour seulement 20 jetons ?',
-          logoPath: 'assets/images/logo.png',
-          onConfirm: () async {
-            Navigator.of(context).pop();
-            try {
-              await Future.delayed(Duration(milliseconds: 100));
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SuccessDialog(
-                    message: 'Produit publié avec succès !',
-                    logoPath: 'assets/images/logo.png',
-                    iconPath: 'assets/icons/check1.png',
-                  );
-                },
-              );
-              await Future.delayed(Duration(seconds: 2));
-              Navigator.of(context).pop();
-            } catch (e) {
-              await Future.delayed(Duration(milliseconds: 100));
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SuccessDialog(
-                    message: 'Erreur lors de la publication du produit : $e',
-                    logoPath: 'assets/images/logo.png',
-                    iconPath: 'assets/icons/echec.png',
-                  );
-                },
-              );
-              await Future.delayed(Duration(seconds: 2));
-              Navigator.of(context).pop();
-            }
-          },
-          onCancel: () {
-            Navigator.of(context).pop();
-          },
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,51 +136,6 @@ class _BanierePublicitaireState extends State<BanierePublicitaire> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () => _showConfirmationDialog(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black26,
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/icons/tokenicon.png',
-                      width: 20,
-                      height: 20,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Publiez à',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      '20 jetons',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Affichage des pubs
           if (_isLoading)
             Center(child: CircularProgressIndicator())
           else if (_errorMessage.isNotEmpty)
@@ -242,7 +151,7 @@ class _BanierePublicitaireState extends State<BanierePublicitaire> {
                     return GestureDetector(
                       onTap: () {
                         if (pub.link != null && pub.link!.isNotEmpty) {
-                          _launchURL(pub.link!); // Ouvrir le lien au clic
+                          _launchURL(pub.link!);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

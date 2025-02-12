@@ -118,12 +118,15 @@ class RentalItemDetailPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
-                            child: Image.asset(
-                              imageUrl,
-                              width: double.infinity,
-                              height: 200.0,
-                              fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(10.r),
+                            child: Container(
+                              color: Colors.black12, // Fond blanc
+                              child: Image.asset(
+                                "assets/images/logo.png",
+                                width: double.infinity,
+                                height: 200.h,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                           SizedBox(height: 16.0),

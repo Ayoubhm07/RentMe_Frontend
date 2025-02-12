@@ -106,7 +106,7 @@ class _SuccessTokenScreenState extends State<SuccessTokenScreen> {
                   SizedBox(height: 40),
                   Center(
                     child: Text(
-                      'La conversion est terminée avec succès.\nPayment ID: ${widget.paymentId}\nAmount: €${widget.amount}',
+                      'La conversion est terminée avec succès!',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w600,

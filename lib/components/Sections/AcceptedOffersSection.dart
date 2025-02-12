@@ -143,11 +143,10 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                                     message: 'Vous voulez marquer cette offre comme terminée ?',
                                     logoPath: 'assets/images/logo.png',
                                     onConfirm: () async {
-                                      Navigator.of(context).pop(); // Close the ConfirmationDialog first
+                                      Navigator.of(context).pop();
                                       offre.status = OfferStatus.done;
                                       try {
                                         await widget.offreService.createOffer(offre);
-                                        // Display the SuccessDialog using the parent context
                                         await Future.delayed(Duration(milliseconds: 100));
                                         showDialog(
                                           context: parentContext,
@@ -159,12 +158,10 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                                             );
                                           },
                                         );
-                                        // Close the SuccessDialog after a delay
                                         await Future.delayed(Duration(seconds: 2));
                                         Navigator.of(parentContext).pop();
                                         Navigator.of(parentContext).pop();
                                       } catch (e) {
-                                        // Display the ErrorDialog using the parent context
                                         await Future.delayed(Duration(milliseconds: 100));
                                         showDialog(
                                           context: parentContext,
@@ -177,11 +174,11 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                                           },
                                         );
                                         await Future.delayed(Duration(seconds: 2));
-                                        Navigator.of(parentContext).pop(); // Close the ErrorDialog
+                                        Navigator.of(parentContext).pop();
                                       }
                                     },
                                     onCancel: () {
-                                      Navigator.of(context).pop(); // Close the ConfirmationDialog
+                                      Navigator.of(context).pop();
                                     },
                                   );
                                 },
