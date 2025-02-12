@@ -124,8 +124,9 @@ class _PendingOffersSectionState extends State<PendingOffersSection> {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return CardOffre(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: _formatDateTime(demand.addedDate),

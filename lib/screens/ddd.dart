@@ -9,7 +9,7 @@ class ChatMessagePage extends StatefulWidget {
 class _ChatMessagePageState extends State<ChatMessagePage> {
   String buttonImagePath = 'assets/icons/deal.png';
   String selectedProviderMessage = '';
-  List<Widget> chatMessages = []; // ListView starts empty
+  List<Widget> chatMessages = [];
 
   void _showAssignDialog() {
     showDialog(

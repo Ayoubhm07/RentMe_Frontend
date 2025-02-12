@@ -25,7 +25,7 @@ class BottomNavBar extends StatelessWidget {
                 height: iconSize * 1.5,
                 width: iconSize * 1.5,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor, // Adjust the color as per your theme
+                  color: AppTheme.primaryColor,
                   borderRadius: BorderRadius.circular(iconSize * 0.75),
                 ),
                 child: Center(

@@ -3,14 +3,16 @@ class NotificationRequest {
   final String body;
   final String topic;
   final String token;
-  final int userId;
+  final int senderId;
+  final int receiverId;
 
   NotificationRequest({
     required this.title,
+    required this.receiverId,
     required this.body,
     required this.topic,
     required this.token,
-    required this.userId,
+    required this.senderId,
   });
 
   Map<String, dynamic> toJson() {
@@ -19,7 +21,8 @@ class NotificationRequest {
       'body': body,
       'topic': topic,
       'token': token,
-      'userId': userId,
+      'senderId': senderId,
+      'receiverId': receiverId,
     };
   }
 }

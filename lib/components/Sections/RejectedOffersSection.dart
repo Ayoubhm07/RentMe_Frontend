@@ -118,8 +118,9 @@ class _RejectedOffersSectionState extends State<RejectedOffersSection> {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return RejectedOffreCard(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: _formatDateTime(demand.addedDate),

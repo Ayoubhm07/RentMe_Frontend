@@ -25,7 +25,6 @@ class CustomSwitchOffreLocation extends StatefulWidget {
 class _CustomSwitchOffreLocationState extends State<CustomSwitchOffreLocation> {
   final OffreLocationService offreService = OffreLocationService();
   late List<bool> isSelected;
-  final OffreService offreServicee = OffreService();
 
 
   @override

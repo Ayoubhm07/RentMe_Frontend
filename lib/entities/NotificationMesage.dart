@@ -5,7 +5,8 @@ class NotificationMessage {
   final String topic;
   final DateTime date;
   final NotificationState state;
-  final int userId;
+  final int receiverId;
+  final int senderId;
 
   NotificationMessage({
     this.id,
@@ -14,7 +15,8 @@ class NotificationMessage {
     required this.topic,
     required this.date,
     required this.state,
-    required this.userId,
+    required this.receiverId,
+    required this.senderId,
   });
 
   factory NotificationMessage.fromJson(Map<String, dynamic> json) {
@@ -28,7 +30,8 @@ class NotificationMessage {
               (e) => e.toString() == 'NotificationState.${json['state']?.toString().toLowerCase()}',
           orElse: () => NotificationState.unread
       ),
-      userId: json['userId'] ?? 0,
+      receiverId: json['receiverId'] ?? 0,
+      senderId: json['senderId'] ?? 0,
     );
   }
 }

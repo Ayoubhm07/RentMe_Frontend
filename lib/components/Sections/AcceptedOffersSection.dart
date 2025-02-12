@@ -122,8 +122,9 @@ class _AcceptedOffersSectionState extends State<AcceptedOffersSection> {
                         } else {
                           Demand demand = demandSnapshot.data!;
                           return AcceptedOfferCard(
+                            locationId: demand.id ??0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             dateDemand: _formatDateTime(demand.addedDate),

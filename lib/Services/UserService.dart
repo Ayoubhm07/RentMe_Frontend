@@ -46,6 +46,31 @@ class UserService {
       return false;
     }
   }
+
+
+  Future<List<User>> getTopFiveContributors() async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.get(
+        Uri.parse('$apiUrl/getTopFiveContributers'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        List<dynamic> jsonResponse = json.decode(response.body);
+        return jsonResponse.map((user) => User.fromJson(user)).toList();
+      } else {
+        print('Erreur de récupération des contributeurs: ${response.statusCode} ${response.reasonPhrase}');
+        return [];
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      return [];
+    }
+  }
+
   Future<bool> authenticate(String email, String password) async {
     try {
       final response = await http.post(Uri.parse('$apiUrl/authenticate'),
@@ -204,6 +229,10 @@ class UserService {
       throw Exception('Failed to load user: $e');
     }
   }
+
+
+
+
   Future<bool> updateUser(User user) async {
     try {
       print('Updating user...' + user.toString());

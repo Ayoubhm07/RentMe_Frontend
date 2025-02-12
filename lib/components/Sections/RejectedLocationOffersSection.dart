@@ -125,8 +125,9 @@ class _RejectedLocationOffersSectionState extends State<RejectedLocationOffersSe
                         } else {
                           Location demand = demandSnapshot.data!;
                           return RejectedOffreCard(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: demand.images,
                             title: demand.description,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: demand.timeUnit,

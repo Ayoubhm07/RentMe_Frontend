@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:khedma/Services/MinIOService.dart';
 
 import '../../Services/NotificationService.dart';
+import '../../Services/ProfileService.dart';
+import '../../entities/ProfileDetails.dart';
 import 'ConfirmationNotficationCard.dart';
 import 'SuccessNotificationCard.dart';
 
@@ -11,9 +17,12 @@ class UnreadNotificationTile extends StatefulWidget {
   final String body;
   final String formattedTime;
   final String imageUrl;
+  final int senderId;
+
 
   const UnreadNotificationTile({
     Key? key,
+    required this.senderId,
     required this.notificationId,
     required this.title,
     required this.body,
@@ -28,11 +37,31 @@ class UnreadNotificationTile extends StatefulWidget {
 class _UnreadNotificationTileState extends State<UnreadNotificationTile> {
   final NotificationService notificationService = NotificationService();
   bool _isUpdatingState = false;
+  ProfileService profileService = ProfileService();
+  MinIOService minIOService = MinIOService();
+  String? userImage;
+
 
   @override
   void initState() {
     super.initState();
+    _fetchUserProfileImage();
     _markAsRead();
+  }
+
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      ProfileDetails profileDetails = await profileService.getProfileDetails(widget.senderId);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
   }
 
   Future<void> _markAsRead() async {
@@ -130,10 +159,10 @@ class _UnreadNotificationTileState extends State<UnreadNotificationTile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(widget.imageUrl.isNotEmpty
-                        ? widget.imageUrl
-                        : 'https://via.placeholder.com/150'),
-                    radius: 24.0,
+                    radius: 18.r,
+                    backgroundImage: widget.imageUrl != null
+                        ? FileImage(File(userImage!))
+                        : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                   ),
                   Text(
                     widget.formattedTime.isNotEmpty ? widget.formattedTime : 'Temps inconnu',

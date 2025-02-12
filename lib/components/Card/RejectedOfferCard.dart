@@ -5,9 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/theme/AppTheme.dart';
 
-class RejectedOffreCard extends StatelessWidget {
+import '../../Services/MinIOService.dart';
+
+class RejectedOffreCard extends StatefulWidget {
   final String userImage;
-  final String imageUrl;
+  final int locationId;
+  final String images;
   final String title;
   final String dateDebut;
   final String addedDate;
@@ -24,7 +27,8 @@ class RejectedOffreCard extends StatelessWidget {
   const RejectedOffreCard({
     Key? key,
     required this.userImage,
-    required this.imageUrl,
+    required this.images,
+    required this.locationId,
     required this.description,
     required this.title,
     required this.dateDebut,
@@ -38,6 +42,64 @@ class RejectedOffreCard extends StatelessWidget {
     required this.onEditPressed,
     required this.onCancelPressed,
   }) : super(key: key);
+  @override
+  _RejectedOffreCardState createState() => _RejectedOffreCardState();
+}
+
+class _RejectedOffreCardState extends State<RejectedOffreCard> {
+  MinIOService minioService = MinIOService();
+  List<String> imageUrls = [];
+  int _currentImageIndex = 0;
+
+
+  Future<void> _loadLocationImages() async {
+    try {
+      print("Images reçues :");
+      print(widget.images);
+      String imagePrefix = 'location{${widget.locationId}}';
+      print(imagePrefix);
+
+      List<String> widgetImages = widget.images.split(',');
+      List<String> cleanedImageNames = widgetImages
+          .map((imageName) => imageName.replaceFirst('images_', '')) // Enlever 'images_' des noms
+          .where((imageName) => imageName.startsWith(imagePrefix)) // Filtrer les images par préfixe
+          .toList();
+      print(cleanedImageNames);
+
+      if (cleanedImageNames.isNotEmpty) {
+        List<String> downloadedImagePaths = [];
+        for (String imageName in cleanedImageNames) {
+          String response = await minioService.LoadFileFromServer('images', imageName);
+          if (response.isNotEmpty) {
+            downloadedImagePaths.add(response);
+          } else {
+            print('❌ Image non trouvée pour : $imageName');
+          }
+        }
+        if (downloadedImagePaths.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              imageUrls = downloadedImagePaths;
+            });
+          }
+        } else {
+          print('⚠️ Aucune image récupérée pour location ID : ${widget.locationId}');
+        }
+      } else {
+        print('⚠️ Aucune image correspondant à location ID : ${widget.locationId}');
+      }
+    } catch (e) {
+      print('❌ Erreur lors du chargement des images de la location : $e');
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocationImages();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +129,7 @@ class RejectedOffreCard extends StatelessWidget {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -75,7 +137,7 @@ class RejectedOffreCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  dateDebut.toString(),
+                  widget.dateDebut.toString(),
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: const Color(0xFF585858),
@@ -83,7 +145,7 @@ class RejectedOffreCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  description,
+                  widget.description,
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: const Color(0xFF585858),
@@ -106,14 +168,14 @@ class RejectedOffreCard extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 18.r,
-                              backgroundImage: userImage != null
-                                  ? FileImage(File(userImage!))
+                              backgroundImage: widget.userImage != null
+                                  ? FileImage(File(widget.userImage!))
                                   : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
-                                ownerName,
+                                widget.ownerName,
                                 style: GoogleFonts.roboto(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.bold,
@@ -129,7 +191,7 @@ class RejectedOffreCard extends StatelessWidget {
                             Icon(Icons.timer, size: 18.sp, color: Colors.blue),
                             SizedBox(width: 4.w),
                             Text(
-                              'Durée: $paiement',
+                              'Durée: ${widget.paiement}',
                               style: GoogleFonts.roboto(
                                 fontSize: 14.sp,
                                 color: Colors.black87,
@@ -143,7 +205,7 @@ class RejectedOffreCard extends StatelessWidget {
                             Icon(Icons.monetization_on, size: 18.sp, color: Colors.green),
                             SizedBox(width: 4.w),
                             Text(
-                              'Budget: $budget',
+                              'Budget: ${widget.budget}',
                               style: GoogleFonts.roboto(
                                 fontSize: 14.sp,
                                 color: Colors.black87,
@@ -153,7 +215,7 @@ class RejectedOffreCard extends StatelessWidget {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          "Statut : $location",
+                          "Statut : ${widget.location}",
                           style: GoogleFonts.roboto(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:khedma/entities/ProfileDetails.dart';
 import 'package:khedma/screens/Login.dart';
+import 'package:khedma/screens/MainPages/AboutUs.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 import '../entities/User.dart';
@@ -21,7 +22,6 @@ class MyDrawer extends StatefulWidget {
   @override
   _MyDrawerState createState() => _MyDrawerState();
 }
-
 
 class _MyDrawerState extends State<MyDrawer> {
   final SharedPrefService sharedPrefService = SharedPrefService();
@@ -73,31 +73,30 @@ class _MyDrawerState extends State<MyDrawer> {
                       children: [
                         // Row containing close icon, centered Menu text, and settings icon
                         Container(
-                          margin: EdgeInsets.fromLTRB(0, 0, 0, 40), // Reduced space here
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 40), // Réduire l'espace ici
                           padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children:[
-                              IconButton(
-                                icon: Icon(Icons.close, color: Color(0xFF0099D6)),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              Text(
-                                'Menu',
-                                style: GoogleFonts.getFont(
-                                  'Roboto',
-                                  fontWeight: FontWeight.bold,  // Set to bold
-                                  fontSize: 20,
-                                  color: Color(0xFF0099D6),
-                                ),
-                              ),
-                               IconButton(
-                                icon: Icon(Icons.settings, color: Color(0xFF0099D6)),
-                                onPressed: widget.toggleDrawer,
-                              ),                           ],
+                          child: Stack(
+                            alignment: Alignment.center, // Centre le texte
+                            children: [
+                            Align(
+                            alignment: Alignment.centerLeft, // Place l'icône à gauche
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Color(0xFF0099D6)),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Menu',
+                            style: GoogleFonts.getFont(
+                              'Roboto',
+                              fontWeight: FontWeight.bold,  // Texte en gras
+                              fontSize: 20,
+                              color: Color(0xFF0099D6),
+                            ),
+                          ),
+                            ],
                           ),
                         ),
                         CircleAvatar(
@@ -245,8 +244,6 @@ class _MyDrawerState extends State<MyDrawer> {
                               context,
                               MaterialPageRoute(builder: (context) => OffreLocationScreen()),
                             );
-
-
                           },
                         ),
                         DrawerItem(
@@ -256,23 +253,11 @@ class _MyDrawerState extends State<MyDrawer> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => DemandelocationtScreen()),
+                              MaterialPageRoute(builder: (context) => AboutUsPage()),
                             );
                           },
                         ),
-                        DrawerItem(
-                          iconPath: 'assets/drawericons/faq1.png',
-                          label: 'Foire aux Questions',
-                          margin: EdgeInsets.fromLTRB(25.2, 0, 0, 16),
-                          onTap: () {
-                            /*Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => DemandeLocationScreen()),
-                            );
 
-                             */
-                          },
-                        ),
                         DrawerItem(
                           iconPath: 'assets/drawericons/logout1.png',
                           label: 'Déconnexion',

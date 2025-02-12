@@ -26,8 +26,10 @@ class _DoneLocationOffersSectionState extends State<DoneLocationOffersSection> {
   final SharedPrefService sharedPrefService = SharedPrefService();
   final MinIOService minIOService = MinIOService();
   final ProfileService profileService = ProfileService();
+
   String? userImage;
-  
+
+
   @override
   void initState() {
     super.initState();
@@ -118,8 +120,9 @@ class _DoneLocationOffersSectionState extends State<DoneLocationOffersSection> {
                         } else {
                           Location demand = demandSnapshot.data!;
                           return DoneOfferCard(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: demand.images,
                             title: demand.description,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: demand.timeUnit,

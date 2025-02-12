@@ -52,9 +52,7 @@ class OffersSection extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Text("Erreur lors de la récupération des offres: ${snapshot.error}");
-        } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return Text("Aucune offre disponible");
-        } else {
+        }else {
           return ListView.builder(
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
@@ -84,7 +82,10 @@ class OffersSection extends StatelessWidget {
                           } else {
                             ProfileDetails profileDetails = profileDetailsSnapshot.data!;
                             return RentalItemCardDisponible(
-                              imageUrl: location.images,
+                              userId: user.id ?? 0,
+                              locationId: location.id ?? 0,
+                              userImage: profileDetails.profilePicture ?? "",
+                              images: location.images,
                               title: location.description,
                               description: location.description,
                               price: "${location.prix}/${location.timeUnit}",

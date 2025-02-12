@@ -1,13 +1,17 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/theme/AppTheme.dart';
 
-class DoneOfferCard extends StatelessWidget {
+import '../../Services/MinIOService.dart';
+
+class DoneOfferCard extends StatefulWidget {
   final String userImage;
-  final String imageUrl;
+  final String images;
+  final int locationId;
   final String title;
   final String dateDebut;
   final String addedDate;
@@ -24,7 +28,8 @@ class DoneOfferCard extends StatelessWidget {
   const DoneOfferCard({
     Key? key,
     required this.userImage,
-    required this.imageUrl,
+    required this.images,
+    required this.locationId,
     required this.description,
     required this.title,
     required this.dateDebut,
@@ -38,6 +43,18 @@ class DoneOfferCard extends StatelessWidget {
     required this.onEditPressed,
     required this.onCancelPressed,
   }) : super(key: key);
+
+  @override
+  _DoneOfferCardState createState() => _DoneOfferCardState();
+}
+
+class _DoneOfferCardState extends State<DoneOfferCard> {
+  MinIOService minioService = MinIOService();
+  List<String> imageUrls = [];
+  int _currentImageIndex = 0;
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +73,65 @@ class DoneOfferCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Image.asset(
-                    "assets/images/menage.jpeg",
-                    width: double.infinity,
-                    height: 150.h,
-                    fit: BoxFit.cover,
+                if (imageUrls.isNotEmpty)
+                  Column(
+                    children: [
+                      CarouselSlider(
+                        items: imageUrls.map((imageUrl) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10.r),
+                            child: Image.file(
+                              File(imageUrl),
+                              width: double.infinity,
+                              height: 150.h,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          height: 250.h,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          viewportFraction: 1.0,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: imageUrls.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8.w,
+                            height: 8.h,
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _currentImageIndex == entry.key
+                                  ? Colors.blue
+                                  : Colors.grey.withOpacity(0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Image.asset(
+                      "assets/images/demandeLocationImage.png",
+                      width: double.infinity,
+                      height: 150.h,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 SizedBox(height: 10.h),
                 Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -75,7 +139,7 @@ class DoneOfferCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  dateDebut.toString(),
+                  widget.dateDebut.toString(),
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: const Color(0xFF585858),
@@ -83,7 +147,7 @@ class DoneOfferCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  description,
+                  widget.description,
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: const Color(0xFF585858),
@@ -106,14 +170,14 @@ class DoneOfferCard extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 18.r,
-                              backgroundImage: userImage != null
-                                  ? FileImage(File(userImage!))
+                              backgroundImage: widget.userImage != null
+                                  ? FileImage(File(widget.userImage))
                                   : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
-                                ownerName,
+                                widget.ownerName,
                                 style: GoogleFonts.roboto(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.bold,
@@ -129,7 +193,7 @@ class DoneOfferCard extends StatelessWidget {
                             Icon(Icons.timer, size: 18.sp, color: Colors.blue),
                             SizedBox(width: 4.w),
                             Text(
-                              'Durée: $paiement',
+                              'Durée: ${widget.paiement}',
                               style: GoogleFonts.roboto(
                                 fontSize: 14.sp,
                                 color: Colors.black87,
@@ -143,7 +207,7 @@ class DoneOfferCard extends StatelessWidget {
                             Icon(Icons.monetization_on, size: 18.sp, color: Colors.green),
                             SizedBox(width: 4.w),
                             Text(
-                              'Budget: $budget',
+                              'Budget: ${widget.budget}',
                               style: GoogleFonts.roboto(
                                 fontSize: 14.sp,
                                 color: Colors.black87,
@@ -153,14 +217,13 @@ class DoneOfferCard extends StatelessWidget {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          "Statut : $location",
+                          "Statut : ${widget.location}",
                           style: GoogleFonts.roboto(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),
-
                       ],
                     ),
                   ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:khedma/Services/MinIOService.dart';
 import 'package:khedma/Services/NotificationService.dart';
+import 'package:khedma/Services/ProfileService.dart';
 import 'package:khedma/Services/SharedPrefService.dart';
 import 'package:intl/intl.dart';
 import 'package:khedma/components/Card/NotificationCard.dart';
@@ -9,6 +11,7 @@ import '../../components/Card/CheckedNotificationCard.dart';
 import '../../components/Card/ConfirmationNotficationCard.dart';
 import '../../components/Card/SuccessNotificationCard.dart';
 import '../../entities/NotificationMesage.dart';
+import '../../entities/ProfileDetails.dart';
 import '../../entities/User.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -19,12 +22,31 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   NotificationService notificationService = NotificationService();
   SharedPrefService sharedPrefService = SharedPrefService();
+  ProfileService profileService = ProfileService();
+  MinIOService minIOService = MinIOService();
+  String? userImage;
   int _userId = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeUser();
+    _fetchUserProfileImage();
+  }
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      User user = await sharedPrefService.getUser();
+      ProfileDetails profileDetails = await profileService.getProfileDetails(user.id ?? 0);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
   }
 
   // Initialize the user
@@ -51,11 +73,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
           message: 'Voulez-vous supprimer toutes les notifications ?',
           logoPath: 'assets/images/logo.png',
           onConfirm: () async {
-            Navigator.of(context).pop(); // Close the confirmation dialog
+            Navigator.of(context).pop();
             try {
               String result = await notificationService.deleteAllNotificationsByUserId(_userId);
-
-              // Show success dialog after deletion
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -118,23 +138,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
               return ListView(
                 children: snapshot.data!.map((notification) {
                   // Display notifications based on their state
-                  if (notification.state == NotificationState.read) {
-                    return NotificationTile(
+                  if (notification.state == NotificationState.unread) {
+                    return UnreadNotificationTile(
+                      senderId: notification.senderId ?? 0,
                       notificationId: notification.id ?? 0,
                       title: notification.title ?? "No title",
                       body: notification.body ?? "No content",
                       formattedTime: DateFormat('dd/MM/yyyy hh:mm a').format(notification.date),
-                      imageUrl:
-                      'https://www.elitesingles.com/wp-content/uploads/sites/85/2020/06/elite_singles_slide_6-350x264.png',
+                      imageUrl:userImage ?? "",
                     );
                   } else {
-                    return UnreadNotificationTile(
+                    return NotificationTile(
+                      senderId: notification.senderId ?? 0,
                       notificationId: notification.id ?? 0,
                       title: notification.title ?? "No title",
                       body: notification.body ?? "No content",
                       formattedTime: DateFormat('dd/MM/yyyy hh:mm a').format(notification.date),
-                      imageUrl:
-                      'https://www.elitesingles.com/wp-content/uploads/sites/85/2020/06/elite_singles_slide_6-350x264.png',
+                      imageUrl:userImage ?? "",
                     );
                   }
                 }).toList(),

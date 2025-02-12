@@ -35,8 +35,54 @@ class MinIOService {
     }
   }
 
+  Future<String> saveLocationImagesToServer(String bucketName, File file, int locationId) async {
+    var request = http.MultipartRequest('POST', Uri.parse('$apiUrl/upload'));
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    Map<String, dynamic> payload = jwtService.getUsernameFromToken(accessToken);
+    String username = jwtService.getUsernameFromToken(accessToken)['sub'];
+    String objectName = 'location{$locationId}-${DateTime.now().millisecondsSinceEpoch}';
+    request.fields['bucketName'] = bucketName;
+    request.fields['objectName'] = objectName;
+    String? mimeType = lookupMimeType(file.path);
+    if (mimeType == null) {
+      mimeType = 'application/octet-stream';
+    }
+    request.headers['Authorization'] = 'Bearer $accessToken';
+    request.files.add(await http.MultipartFile.fromPath('file', file.path,
+        contentType: MediaType.parse(mimeType)));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      return ('${bucketName}_$objectName');
+    } else {
+      throw Exception('Failed to upload file: ${response.reasonPhrase}');
+    }
+  }
+
+  Future<String> saveTravailImagesToServer(String bucketName, File file, int travailId) async {
+    var request = http.MultipartRequest('POST', Uri.parse('$apiUrl/upload'));
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    Map<String, dynamic> payload = jwtService.getUsernameFromToken(accessToken);
+    String username = jwtService.getUsernameFromToken(accessToken)['sub'];
+    String objectName = 'travail{$travailId}-${DateTime.now().millisecondsSinceEpoch}';
+    request.fields['bucketName'] = bucketName;
+    request.fields['objectName'] = objectName;
+    String? mimeType = lookupMimeType(file.path);
+    if (mimeType == null) {
+      mimeType = 'application/octet-stream';
+    }
+    request.headers['Authorization'] = 'Bearer $accessToken';
+    request.files.add(await http.MultipartFile.fromPath('file', file.path,
+        contentType: MediaType.parse(mimeType)));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      return ('${bucketName}_$objectName');
+    } else {
+      throw Exception('Failed to upload file: ${response.reasonPhrase}');
+    }
+  }
+
   Future<String> LoadFileFromServer(String bucketName, String objectName) async {
-    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    var response = await http.get(
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    var response = await http.get(
       Uri.parse(
           '$apiUrl/download?bucketName=$bucketName&objectName=$objectName'),
       headers: {

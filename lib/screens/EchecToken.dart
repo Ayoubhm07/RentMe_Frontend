@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'Profile.dart';
+import 'NewProfile.dart';
 
 class EchecTokenScreen extends StatefulWidget {
   @override
@@ -13,10 +13,10 @@ class _EchecTokenScreenState extends State<EchecTokenScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 9, 9, 9), // Background color behind the card
+      backgroundColor: const Color.fromARGB(255, 9, 9, 9),
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Shrink-wrap the column
+          mainAxisSize: MainAxisSize.min,
           children: [
             Spacer(),
             Container(

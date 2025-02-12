@@ -1,39 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:khedma/Services/MinIOService.dart';
 import 'package:khedma/Services/ProfileService.dart';
+import 'package:khedma/Services/UserService.dart';
 import 'package:khedma/components/Stepper/ProfileStepper.dart';
 import 'package:khedma/components/navbara.dart';
+import 'package:khedma/screens/Profile/CheckUserPubs.dart';
+import 'package:khedma/screens/Profile/ContactUser.dart';
 import '../Services/SharedPrefService.dart';
 import '../entities/ProfileDetails.dart';
 import '../entities/User.dart';
 import 'Profile/ProfileBalance.dart';
-import 'Profile/ProfileHeader.dart';
+import 'Profile/CheckedProfileHeader.dart';
 import 'Profile/ProfileInfo.dart';
 import 'Profile/ProfileBlogs.dart';
 import 'SideMenu.dart'; // Importe le nouveau fichier
 
-class ProfilePage extends StatefulWidget {
+class CheckProfile extends StatefulWidget {
+  final int userId;
+
+  const CheckProfile({super.key, required this.userId});
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<CheckProfile> createState() => _CheckProfileState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  final SharedPrefService sharedPrefService = SharedPrefService();
-  User? user;
+class _CheckProfileState extends State<CheckProfile> {
+  final MinIOService minIOService = MinIOService();
+  final ProfileService profileService = ProfileService();
+  final UserService userService = UserService();
+  String? userImage;
+  User? user,currentUser;
   ProfileDetails? profileDetails;
-  ProfileService profileService =ProfileService();
   bool _isSettingsDrawer = false;
 
+
   Future<void> loadUserAndDetails() async {
-    user = await sharedPrefService.getUser();
-    profileDetails = await profileService.getProfileDetails(user!.id ?? 0);
+    user = await userService.findUserById(widget.userId);
+    profileDetails = await profileService.getProfileDetails(widget.userId);
     setState(() {});
+  }
+
+
+  Future<void> loadCurrentUser() async {
+    currentUser = await SharedPrefService().getUser();
+    setState(() {});
+  }
+
+
+
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      ProfileDetails profileDetails = await profileService.getProfileDetails(widget.userId);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    loadCurrentUser();
     loadUserAndDetails();
+    _fetchUserProfileImage();
   }
 
   void _toggleDrawer(BuildContext context) {
@@ -68,40 +103,14 @@ class _ProfilePageState extends State<ProfilePage> {
         iconTheme: IconThemeData(
           color: Colors.white,
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Image cliquable pour naviguer vers ProfileStepper
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfileStepper()),
-                );
-              },
-              child: Container(
-                width: 24,
-                height: 24,
-                child: Image.asset(
-                  'assets/icons/edit.png',
-                  width: 24,
-                  height: 24,
-                ),
-              ),
-            ),
-            // Titre "Mon Profile"
-            Text(
-              'Mon Profile',
-              style: GoogleFonts.getFont(
-                'Roboto',
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
-            ),
-            // Espace pour équilibrer la disposition
-            SizedBox(width: 24),
-          ],
+        centerTitle: true, // Assure que le titre est bien centré
+        title: Text(
+          'User Profile',
+          style: GoogleFonts.roboto(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
         ),
         actions: [
           Builder(
@@ -116,13 +125,14 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
-            ProfileBalance(user: user!),
+            ContactUser(senderId: currentUser!.id ?? 0, receiverId: widget.userId),
             ProfileHeader(user: user!, profileDetails: profileDetails!),
             ProfileInfo(profileDetails: profileDetails!, user: user!),
-            ProfileBlogs(),
+            CheckUserPubs(userId: user!.id ?? 0),
           ],
         ),
       ),

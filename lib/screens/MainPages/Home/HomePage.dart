@@ -149,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20.h),
-            BanierePublicitaire(assets: baniereAssets),
+            BanierePublicitaire(),
             HowItWorksSection(),
             WhyChooseRentMeSection(),
             OurServicesSection(),

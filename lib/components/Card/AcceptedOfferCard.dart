@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AcceptedOfferCard extends StatelessWidget {
+import '../../Services/MinIOService.dart';
+
+class AcceptedOfferCard extends StatefulWidget {
   final String userImage;
-  final String imageUrl;
+  final String images;
+  final int locationId;
   final String title;
   final String description;
   final String dateDebut;
@@ -22,7 +26,8 @@ class AcceptedOfferCard extends StatelessWidget {
   const AcceptedOfferCard({
     Key? key,
     required this.userImage,
-    required this.imageUrl,
+    required this.images,
+    required this.locationId,
     required this.description,
     required this.title,
     required this.dateDebut,
@@ -35,6 +40,63 @@ class AcceptedOfferCard extends StatelessWidget {
     required this.onChatPressed,
     required this.onEditPressed,
   }) : super(key: key);
+
+  @override
+  _AcceptedOfferCardState createState() => _AcceptedOfferCardState();
+}
+
+class _AcceptedOfferCardState extends State<AcceptedOfferCard> {
+  MinIOService minioService = MinIOService();
+  List<String> imageUrls = [];
+  int _currentImageIndex = 0;
+
+  Future<void> _loadLocationImages() async {
+    try {
+      print("Images reçues :");
+      print(widget.images);
+      String imagePrefix = 'location{${widget.locationId}}';
+      print(imagePrefix);
+
+      List<String> widgetImages = widget.images.split(',');
+      List<String> cleanedImageNames = widgetImages
+          .map((imageName) => imageName.replaceFirst('images_', '')) // Enlever 'images_' des noms
+          .where((imageName) => imageName.startsWith(imagePrefix)) // Filtrer les images par préfixe
+          .toList();
+      print(cleanedImageNames);
+
+      if (cleanedImageNames.isNotEmpty) {
+        List<String> downloadedImagePaths = [];
+        for (String imageName in cleanedImageNames) {
+          String response = await minioService.LoadFileFromServer('images', imageName);
+          if (response.isNotEmpty) {
+            downloadedImagePaths.add(response);
+          } else {
+            print('❌ Image non trouvée pour : $imageName');
+          }
+        }
+        if (downloadedImagePaths.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              imageUrls = downloadedImagePaths;
+            });
+          }
+        } else {
+          print('⚠️ Aucune image récupérée pour location ID : ${widget.locationId}');
+        }
+      } else {
+        print('⚠️ Aucune image correspondant à location ID : ${widget.locationId}');
+      }
+    } catch (e) {
+      print('❌ Erreur lors du chargement des images de la location : $e');
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocationImages();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,18 +115,65 @@ class AcceptedOfferCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Image.asset(
-                    "assets/images/menage.jpeg",
-                    width: double.infinity,
-                    height: 150.h,
-                    fit: BoxFit.cover,
+                if (imageUrls.isNotEmpty)
+                  Column(
+                    children: [
+                      CarouselSlider(
+                        items: imageUrls.map((imageUrl) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10.r),
+                            child: Image.file(
+                              File(imageUrl),
+                              width: double.infinity,
+                              height: 150.h,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          height: 250.h,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          viewportFraction: 1.0,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: imageUrls.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8.w,
+                            height: 8.h,
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _currentImageIndex == entry.key
+                                  ? Colors.blue
+                                  : Colors.grey.withOpacity(0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Image.asset(
+                      "assets/images/demandeLocationImage.png",
+                      width: double.infinity,
+                      height: 150.h,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 SizedBox(height: 10.h),
                 Text(
-                  title,
+                  widget.title,
                   style: GoogleFonts.roboto(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -72,7 +181,7 @@ class AcceptedOfferCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  "Date de création : ${dateDebut.toString()}",
+                  "Date de création : ${widget.dateDebut.toString()}",
                   style: GoogleFonts.roboto(
                     fontSize: 14.sp,
                     color: Colors.grey[600],
@@ -80,7 +189,7 @@ class AcceptedOfferCard extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 Text(
-                  description,
+                  widget.description,
                   style: GoogleFonts.roboto(
                     fontSize: 14.sp,
                     color: Colors.grey[600],
@@ -103,14 +212,14 @@ class AcceptedOfferCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18.r,
-                      backgroundImage: userImage != null
-                          ? FileImage(File(userImage!))
+                      backgroundImage: widget.userImage != null
+                          ? FileImage(File(widget.userImage!))
                           : AssetImage("assets/images/default_avatar.png") as ImageProvider,
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
-                        ownerName,
+                        widget.ownerName,
                         style: GoogleFonts.roboto(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -120,7 +229,7 @@ class AcceptedOfferCard extends StatelessWidget {
                     ),
                     IconButton(
                       icon: Icon(Icons.chat, color: Colors.blue[300], size: 24.sp),
-                      onPressed: onChatPressed,
+                      onPressed: widget.onChatPressed,
                     ),
                   ],
                 ),
@@ -130,7 +239,7 @@ class AcceptedOfferCard extends StatelessWidget {
                     Icon(Icons.timer, size: 18.sp, color: Colors.blue),
                     SizedBox(width: 4.w),
                     Text(
-                      'Durée: $duree',
+                      'Durée: ${widget.duree}',
                       style: GoogleFonts.roboto(
                         fontSize: 14.sp,
                         color: Colors.black87,
@@ -144,7 +253,7 @@ class AcceptedOfferCard extends StatelessWidget {
                     Icon(Icons.monetization_on, size: 18.sp, color: Colors.green),
                     SizedBox(width: 4.w),
                     Text(
-                      'Budget: $budget',
+                      'Budget: ${widget.budget}',
                       style: GoogleFonts.roboto(
                         fontSize: 14.sp,
                         color: Colors.black87,
@@ -158,7 +267,7 @@ class AcceptedOfferCard extends StatelessWidget {
           Icon(Icons.date_range, size: 18.sp, color: Colors.blue),
           SizedBox(width: 4.w),
           Text(
-            'Date de début: ${dateDebut.toString()}',
+            'Date de début: ${widget.dateDebut.toString()}',
             style: GoogleFonts.roboto(
               fontSize: 14.sp,
               color: Colors.black87,
@@ -168,7 +277,7 @@ class AcceptedOfferCard extends StatelessWidget {
       ),
                 SizedBox(height: 10.h),
                 Text(
-                  "Statut : $status",
+                  "Statut : ${widget.status}",
                   style: GoogleFonts.roboto(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -187,7 +296,7 @@ class AcceptedOfferCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
-                      onPressed: onTerminerPressed,
+                      onPressed: widget.onTerminerPressed,
                       icon: Icon(Icons.check_circle, size: 16.sp, color: Colors.white),
                       label: Text(
                         'Terminer',

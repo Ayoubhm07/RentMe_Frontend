@@ -42,8 +42,6 @@ class MyLocationsOffersSection extends StatelessWidget {
                 return Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Text("Erreur lors de la récupération de vos offres: ${snapshot.error}");
-              } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                return Text("Vous n'avez aucune offre");
               } else {
                 return FutureBuilder(
                   future: profileService.getProfileDetails(user.id ?? 0),
@@ -62,7 +60,7 @@ class MyLocationsOffersSection extends StatelessWidget {
                           return location.status == LocationStatus.NON
                               ? RentalItemCardHistorique(
                             locationId: location.id ?? 0,
-                            imageUrl: location.images,
+                            images: location.images,
                             title: location.description,
                             price: "${location.prix}/${location.timeUnit}",
                             location: location.category,
@@ -75,7 +73,7 @@ class MyLocationsOffersSection extends StatelessWidget {
                             timeUnit: location.timeUnit,
                             locationId: location.id ?? 0,
                             category: location.category,
-                            imageUrl: location.images,
+                            images: location.images,
                             title: location.description,
                             price: "${location.prix}/${location.timeUnit}",
                             location: location.category,

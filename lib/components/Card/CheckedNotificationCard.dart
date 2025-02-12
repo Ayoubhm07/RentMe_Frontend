@@ -1,25 +1,67 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../Services/MinIOService.dart';
 import '../../Services/NotificationService.dart';
+import '../../Services/ProfileService.dart';
+import '../../entities/ProfileDetails.dart';
 import 'ConfirmationNotficationCard.dart';
 import 'SuccessNotificationCard.dart';
 
-class NotificationTile extends StatelessWidget {
+class NotificationTile extends StatefulWidget {
   final int notificationId;
   final String title;
   final String body;
   final String formattedTime;
   final String imageUrl;
+  final int senderId;
 
   const NotificationTile({
     Key? key,
+    required this.senderId,
     required this.notificationId,
     required this.title,
     required this.body,
     required this.formattedTime,
     required this.imageUrl,
   }) : super(key: key);
+
+  @override
+  _NotificationTileState createState() => _NotificationTileState();
+}
+
+class _NotificationTileState extends State<NotificationTile> {
+
+  final NotificationService notificationService = NotificationService();
+  bool _isUpdatingState = false;
+  ProfileService profileService = ProfileService();
+  MinIOService minIOService = MinIOService();
+  String? userImage;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfileImage();
+  }
+
+  Future<void> _fetchUserProfileImage() async {
+    try {
+      ProfileDetails profileDetails = await profileService.getProfileDetails(widget.senderId);
+      String objectName = profileDetails.profilePicture!.replaceFirst('images_', '');
+      String filePath = await minIOService.LoadFileFromServer('images', objectName);
+      setState(() {
+        userImage = filePath;
+      });
+      print(userImage);
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
+
 
   Future<void> _deleteNotification(BuildContext parentContext) async {
     final notificationService = NotificationService();
@@ -32,7 +74,7 @@ class NotificationTile extends StatelessWidget {
           onConfirm: () async {
             Navigator.of(context).pop();
             try {
-              await notificationService.deleteNotification(notificationId);
+              await notificationService.deleteNotification(widget.notificationId);
               showDialog(
                 context: parentContext,
                 builder: (BuildContext context) {
@@ -101,21 +143,26 @@ class NotificationTile extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CircleAvatar(backgroundImage: NetworkImage(imageUrl)),
+                  CircleAvatar(
+                    radius: 18.r,
+                    backgroundImage: userImage != null
+                        ? FileImage(File(userImage!))
+                        : AssetImage("assets/images/default_avatar.png") as ImageProvider,
+                  ),
                   Text(
-                    formattedTime,
+                    widget.formattedTime,
                     style: TextStyle(color: Colors.grey, fontSize: 12.0),
                   ),
                 ],
               ),
               SizedBox(height: 8.0),
               Text(
-                title,
+                widget.title,
                 style: GoogleFonts.roboto(fontSize: 16.0, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4.0),
               Text(
-                body,
+                widget.body,
                 style: GoogleFonts.roboto(fontSize: 14.0, color: Colors.grey[600]),
               ),
             ],

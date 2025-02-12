@@ -155,7 +155,8 @@ class OffreService {
               title: "Nouvelle offre ajoutee",
               body: "Vous avez recu une offre de la part de ${user.userName}",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ,
+              receiverId: receiverId ,
+              senderId: user.id ?? 0,
               topic: 'offre');
           await notificationService.sendNotificationByToken(notificationRequest);
           print('Offre créée avec succès');
@@ -244,7 +245,8 @@ class OffreService {
               title: "Offre Acceptee",
               body: "${user.userName} a accepte votre offre.",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ,
+              receiverId: receiverId ,
+              senderId: user.id ??0,
               topic: 'offre');
           await notificationService.sendNotificationByToken(notificationRequest);
           print('Offre créée avec succès');
@@ -283,7 +285,8 @@ class OffreService {
               title: "Offre Terminee",
               body: "Vous devez payer ${user.userName}.",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ?? 0,
+              receiverId: receiverId ?? 0,
+              senderId: user.id ?? 0,
               topic: 'offre');
           await notificationService.sendNotificationByToken(notificationRequest);
           print('Offre terminée avec succès');

@@ -17,9 +17,14 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = PageStorage.of(context)?.readState(context) ?? 0;
+  }
+
   void _onItemTapped(int index) {
     if (index == 1) {
-      // If case 2 (index 1), don't navigate, just show a tooltip
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -34,12 +39,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
           backgroundColor: Colors.blue,
         ),
       );
-      return; // Prevent further action
+      return; // Empêcher toute autre action
     }
 
     setState(() {
       _selectedIndex = index;
     });
+
+    // Sauvegarder l'index sélectionné dans PageStorage
+    PageStorage.of(context)?.writeState(context, index);
 
     switch (index) {
       case 0:
@@ -87,6 +95,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             "assets/icons/Home.png",
             height: iconSize,
             width: iconSize,
+            color: _selectedIndex == 0 ? AppTheme.primaryColor : Colors.grey,
           ),
           label: '',
         ),
@@ -95,11 +104,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
             alignment: Alignment.center,
             children: [
               Opacity(
-                opacity: 0.5, // Make the icon appear dimmed
+                opacity: 0.5, // Rendre l'icône plus claire
                 child: Image.asset(
                   "assets/icons/journal.png",
                   height: iconSize * 0.9,
                   width: iconSize * 0.9,
+                  color: _selectedIndex == 1 ? AppTheme.primaryColor : Colors.grey,
                 ),
               ),
               Positioned(
@@ -129,6 +139,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 "assets/icons/plus.png",
                 height: iconSize * 0.8,
                 width: iconSize * 0.8,
+                color: _selectedIndex == 2 ? Colors.white : Colors.grey,
               ),
             ),
           ),
@@ -139,6 +150,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             "assets/icons/chat.png",
             height: iconSize,
             width: iconSize,
+            color: _selectedIndex == 3 ? AppTheme.primaryColor : Colors.grey,
           ),
           label: '',
         ),
@@ -147,6 +159,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             "assets/icons/profile.png",
             height: iconSize * 0.8,
             width: iconSize * 0.8,
+            color: _selectedIndex == 4 ? AppTheme.primaryColor : Colors.grey,
           ),
           label: '',
         ),

@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:khedma/Services/DemandeService.dart';
 import 'package:khedma/components/Sections/MyDemandOffersSection.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../Services/OffreService.dart';
 import '../Services/ProfileService.dart';
@@ -20,6 +22,7 @@ import 'Card/DemandAcceptedOfferCard.dart';
 import 'Card/SuccessNotificationCard.dart';
 import 'appBar/appBar.dart';
 import '../components/Sheets/showBottomSheet.dart';
+
 class RentalItemMyDemandDetails extends StatelessWidget {
   final int demandId;
   final String imageUrl;
@@ -38,7 +41,6 @@ class RentalItemMyDemandDetails extends StatelessWidget {
     required this.imageUrl,
     required this.title,
     required this.description,
-
     required this.date,
     required this.evalue,
     required this.budget,
@@ -46,15 +48,16 @@ class RentalItemMyDemandDetails extends StatelessWidget {
     required this.ownerImageUrl,
     required this.statut,
   }) : super(key: key);
+
   void _handleCancelPressed(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return ConfirmationDialog(
           message: 'Êtes-vous sûr de vouloir supprimer cette demande ?',
-          logoPath: 'assets/images/logo.png',  // Replace with your actual logo path
+          logoPath: 'assets/images/logo.png',
           onConfirm: () async {
-            Navigator.of(context).pop(); // Close the dialog first
+            Navigator.of(context).pop();
             try {
               await DemandeService().deleteDemande(demandId);
               showDialog(
@@ -95,7 +98,219 @@ class RentalItemMyDemandDetails extends StatelessWidget {
       },
     );
   }
+  @override
+  Widget _buildNoOffersCard() {
+    return Card(
+      margin: EdgeInsets.all(16.0),
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.assignment, size: 50.0, color: Colors.grey[600]),
+            SizedBox(height: 16.0),
+            Text(
+              'Pas d\'offres encore pour cette demande',
+              style: GoogleFonts.roboto(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildDemandDetailsCard(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(16.0),
+      elevation: 8.0, // Ombre plus prononcée
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0), // Bordures arrondies
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image avec bordure arrondie
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20.0),
+              child: Image.asset(
+                imageUrl,
+                width: double.infinity,
+                height: 200.0,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(height: 20.0),
+
+            // Titre centré
+            Center(
+              child: Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 18.0.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            SizedBox(height: 16.0),
+
+            // Description
+            Text(
+              'Description: $description',
+              style: GoogleFonts.poppins(
+                fontSize: 14.0.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+
+
+            SizedBox(height: 16.0),
+
+            // Budget
+            Row(
+              children: [
+                Text(
+                  'Budget: ',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.0.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+                Image.asset(
+                  "assets/icons/tokenicon.png",
+                  width: 20.w,
+                  height: 20.h,
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  budget.toString(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.0.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+
+              ],
+            ),
+
+            SizedBox(height: 16.0),
+
+            // Date
+            Text(
+              'Ajoutée le: $date',
+              style: GoogleFonts.poppins(
+                fontSize: 12.0.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+
+            SizedBox(height: 24.0),
+
+            // Propriétaire
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20.r,
+                  backgroundImage: FileImage(File(ownerImageUrl)),
+                ),
+                SizedBox(width: 10.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Propriétaire',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.0.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.green,
+                      ),
+                    ),
+                    Text(
+                      ownerName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.0.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 24.0),
+
+            // Boutons Modifier et Supprimer
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Bouton Modifier
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFEEA41D), // Couleur orange
+                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 4.0, // Ombre du bouton
+                    ),
+                    onPressed: () => showEditBottomSheet(context, idDemand: demandId),
+                    icon: Icon(Icons.edit, size: 16.sp, color: Colors.white),
+                    label: Text(
+                      'Modifier',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+
+                  // Bouton Supprimer
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red, // Couleur rouge
+                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 4.0, // Ombre du bouton
+                    ),
+                    onPressed: () => _handleCancelPressed(context),
+                    icon: Icon(Icons.delete, size: 16.sp, color: Colors.white),
+                    label: Text(
+                      'Supprimer',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,266 +318,101 @@ class RentalItemMyDemandDetails extends StatelessWidget {
     OffreService offreService = OffreService();
 
     return Scaffold(
-      backgroundColor: AppTheme.grey,
+      backgroundColor: AppTheme.brightBlue,
       appBar: CustomAppBar(
         notificationIcon: Icon(Icons.notifications, color: Colors.white),
-        title: 'Espace Demandes',
+        title: 'Consultez Votre Demande',
         showSearchBar: false,
-        backgroundColor: AppTheme.grey,
+        backgroundColor: AppTheme.brightBlue,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 16.0),
-          Center(
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w), // Vertical and horizontal padding
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.black,
-                    Colors.grey[850]!,
-                  ],
+        child: AnimationLimiter(
+          child: Column(
+            children: AnimationConfiguration.toStaggeredList(
+              duration: const Duration(milliseconds: 375),
+              childAnimationBuilder: (widget) => SlideAnimation(
+                horizontalOffset: 50.0,
+                child: FadeInAnimation(
+                  child: widget,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
               ),
-              child: Text(
-                "Détails de la Demande",
-                style: GoogleFonts.roboto(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              children: [
+                SizedBox(height: 16.0),
+                _buildDemandDetailsCard(context),
+                FutureBuilder<List<Offre>>(
+                  future: offreService.getOffersByDemand(demandId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          margin: EdgeInsets.all(16.0),
+                          height: 100.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      Offre? acceptedOffer = snapshot.data!.firstWhereOrNull(
+                              (offer) => offer.status == OfferStatus.accepted
+                      );
+
+                      if (acceptedOffer != null) {
+                        return FutureBuilder<User>(
+                          future: userService.findUserById(acceptedOffer.userId),
+                          builder: (context, userSnapshot) {
+                            if (userSnapshot.connectionState == ConnectionState.waiting) {
+                              return Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  margin: EdgeInsets.all(16.0),
+                                  height: 100.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                ),
+                              );
+                            } else if (userSnapshot.hasError) {
+                              return Text('Error fetching user: ${userSnapshot.error}');
+                            } else if (userSnapshot.hasData) {
+                              return DemandAcceptedOfferCard(
+                                benifId: acceptedOffer.userId,
+                                userName: userSnapshot.data!.userName,
+                                userImage: "",
+                                acceptedAt: acceptedOffer.acceptedAt,
+                                duration: acceptedOffer.periode,
+                                price: acceptedOffer.price,
+                                demandId: acceptedOffer.demandId,
+                              );
+                            } else {
+                              return Text("User data not available.");
+                            }
+                          },
+                        );
+                      }
+
+                      List<Offre> pendingOffers = snapshot.data!.where(
+                              (offer) => offer.status == OfferStatus.pending
+                      ).toList();
+
+                      return MyDemandOffersSection(offers: pendingOffers);
+                    } else {
+                      return _buildNoOffersCard();
+                    }
+                  },
                 ),
-                textAlign: TextAlign.center,
-              ),
+              ],
             ),
           ),
-          SizedBox(height: 10.0),
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Card(
-                  color: Colors.white,
-                  elevation: 4.0, // Optional: for shadow effect
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20.0), // Optional: rounded corners
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: 600.0, // Set a maximum width for the card
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
-                            child: Image.asset(
-                              imageUrl,
-                              width: double.infinity,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          SizedBox(height: 16.0),
-                          Center(
-                            child: Text(
-                              title,
-                              style: GoogleFonts.roboto(
-                                fontSize: 14.19.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Description:',
-                                style: GoogleFonts.roboto(
-                                  fontSize: 12.42.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              Text(
-                                description,
-                                style: GoogleFonts.roboto(
-                                  fontSize: 12.42.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Besoin d’un expert.',
-                            style: GoogleFonts.roboto(
-                              fontSize: 12.42.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Row(
-                            children: [
-                              Text(
-                                'Budget: ',
-                                style: GoogleFonts.roboto(
-                                  fontSize: 12.42.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Image.asset(
-                                "assets/icons/tokenicon.png",
-                                width: 20.w,
-                                height: 20.h,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                budget.toString(),
-                                style: GoogleFonts.roboto(
-                                  fontSize: 12.42.sp,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 40.0),
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 18.r,
-                                backgroundImage: FileImage(File(ownerImageUrl)),
-                              ),
-                              SizedBox(width: 8.0),
-                              Text(
-                                ownerName,
-                                style: GoogleFonts.roboto(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: 20.0),
-                          Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFEEA41D),
-                                      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.r),
-                                      ),
-                                    ),
-                                    onPressed: () => showEditBottomSheet(context,idDemand: demandId),
-                                    icon: Icon(Icons.edit, size: 16.sp, color: Colors.white),
-                                    label: Text(
-                                      'Modifier',
-                                      style: GoogleFonts.roboto(fontSize: 12.sp, color: Colors.white),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w), // Space between buttons
-                                  ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.r),
-                                      ),
-                                    ),
-                                    onPressed: () => _handleCancelPressed(context),  // Corrected handler invocation
-                                    icon: Icon(Icons.cancel, size: 16.sp, color: Colors.white),
-                                    label: Text(
-                                      'Supprimer',
-                                      style: GoogleFonts.roboto(fontSize: 12.sp, color: Colors.white),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            FutureBuilder<List<Offre>>(
-              future: offreService.getOffersByDemand(demandId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  // Search for an accepted offer
-                  Offre? acceptedOffer = snapshot.data!.firstWhereOrNull(
-                          (offer) => offer.status == OfferStatus.accepted
-                  );
-
-                  if (acceptedOffer != null) {
-                    return FutureBuilder<User>(
-                      future: userService.findUserById(acceptedOffer.userId),
-                      builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (userSnapshot.hasError) {
-                          return Text('Error fetching user: ${userSnapshot.error}');
-                        } else if (userSnapshot.hasData) {
-                          return DemandAcceptedOfferCard(
-                            benifId: acceptedOffer.userId,
-                            userName: userSnapshot.data!.userName,
-                            userImage: "",
-                            acceptedAt: acceptedOffer.acceptedAt,
-                            duration: acceptedOffer.periode,
-                            price: acceptedOffer.price,
-                            demandId: acceptedOffer.demandId,
-                          );
-                        } else {
-                          return Text("User data not available.");
-                        }
-                      },
-                    );
-                  }
-
-                  List<Offre> pendingOffers = snapshot.data!.where(
-                          (offer) => offer.status == OfferStatus.pending
-                  ).toList();
-
-                  return MyDemandOffersSection(offers: pendingOffers);
-                } else {
-                  return Text("No offers available.");
-                }
-              },
-            ),
-
-          ],
         ),
       ),
     );
   }
 }
-
-
-
-

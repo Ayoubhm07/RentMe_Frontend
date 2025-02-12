@@ -40,25 +40,6 @@ class _DemandelocationtScreenState extends State<DemandelocationtScreen> {
         showSearchBar: false,
         backgroundColor: Color(0xFFF7AA1E),
       ),
-      // appBar: CustomAppBar(
-      //   notificationIcon: Icon(Icons.notifications, color: Colors.white),
-      //   title: 'Demande Location',
-      //   showSearchBar: false,
-      //   backgroundColor: Color(0xFFF7AA1E),
-      //   // Pass the scaffold key if needed for further use
-      //    actions: [
-      //     Builder(
-      //       builder: (context) => IconButton(
-      //         icon: Icon(Icons.menu),
-      //         onPressed: () {
-      //           Scaffold.of(context).openEndDrawer();
-      //         },
-      //       ),
-      //     ),
-
-      //    ],
-      // ),
-
       body: Column(
         children: [
           CustomSwitchLocation(

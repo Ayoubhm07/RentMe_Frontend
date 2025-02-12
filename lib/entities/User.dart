@@ -18,6 +18,8 @@ class User {
   String? fcmToken;
   double? balance;
   String? stripeAccountId;
+  double? note;
+  int? nbNote;
 
   User(
       {this.id,
@@ -36,7 +38,9 @@ class User {
         this.isPhoneVerified,
         this.stripeAccountId,
         this.balance,
-        this.fcmToken});
+        this.fcmToken,
+        this.note,
+        this.nbNote});
 
   Map<String, dynamic> toJson() {
     return {
@@ -56,7 +60,9 @@ class User {
       'accountBanned': isAccountBanned,
       'emailVerified': isEmailVerified,
       'phoneVerified': isPhoneVerified,
-      'stripeAccountId': stripeAccountId
+      'stripeAccountId': stripeAccountId,
+      'note': note,
+      'nbNote': nbNote
     };
   }
 
@@ -78,7 +84,11 @@ class User {
         isAccountBanned: json['accountBanned'] ?? false,
         isEmailVerified: json['emailVerified'] ?? false,
         isPhoneVerified: json['phoneVerified'] ?? false,
-        stripeAccountId: json['stripeAccountId'] ?? '');
+        stripeAccountId: json['stripeAccountId'] ?? '',
+        note: json['note'] ?? 0,
+        nbNote: json['nbNote'] ?? 0,
+
+    );
   }
 
   @override
@@ -99,6 +109,8 @@ class User {
         'isAccountBanned: $isAccountBanned'
         'stripeAccountId: $stripeAccountId '
         'fcmToken: $fcmToken'
+        'note: $note'
+        'nbNote: $nbNote'
         '}';
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +16,7 @@ import 'AcceptedOfferDetailsCard.dart';
 
 
 class RentalItemCardHistorique extends StatefulWidget {
-  final String imageUrl;
+  final String images;
   final String title;
   final String price;
   final String location;
@@ -28,7 +30,7 @@ class RentalItemCardHistorique extends StatefulWidget {
     Key? key,
     required this.userImage,
     required this.locationId,
-    required this.imageUrl,
+    required this.images,
     required this.title,
     required this.price,
     required this.location,
@@ -48,12 +50,57 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
   String? _username;
   MinIOService minioService = MinIOService();
   String? userProfileImage;
+  List<String> imageUrls = [];
+  int _currentImageIndex = 0;
+
+  Future<void> _loadLocationImages() async {
+    try {
+      print("Images reçues :");
+      print(widget.images);
+      String imagePrefix = 'location{${widget.locationId}}';
+      print(imagePrefix);
+
+      List<String> widgetImages = widget.images.split(',');
+      List<String> cleanedImageNames = widgetImages
+          .map((imageName) => imageName.replaceFirst('images_', '')) // Enlever 'images_' des noms
+          .where((imageName) => imageName.startsWith(imagePrefix)) // Filtrer les images par préfixe
+          .toList();
+      print(cleanedImageNames);
+
+      if (cleanedImageNames.isNotEmpty) {
+        List<String> downloadedImagePaths = [];
+        for (String imageName in cleanedImageNames) {
+          String response = await minioService.LoadFileFromServer('images', imageName);
+          if (response.isNotEmpty) {
+            downloadedImagePaths.add(response);
+          } else {
+            print('❌ Image non trouvée pour : $imageName');
+          }
+        }
+        if (downloadedImagePaths.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              imageUrls = downloadedImagePaths;
+            });
+          }
+        } else {
+          print('⚠️ Aucune image récupérée pour location ID : ${widget.locationId}');
+        }
+      } else {
+        print('⚠️ Aucune image correspondant à location ID : ${widget.locationId}');
+      }
+    } catch (e) {
+      print('❌ Erreur lors du chargement des images de la location : $e');
+    }
+  }
+
 
   @override
   void initState() {
     super.initState();
     _loadOffers();
     _fetchUserProfileImage();
+    _loadLocationImages();
   }
 
   Future<void> _fetchUserProfileImage() async {
@@ -115,15 +162,62 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Image.asset(
-                    "assets/images/demandeLocationImage.png",
-                    width: double.infinity,
-                    height: 200.h,
-                    fit: BoxFit.cover,
+                if (imageUrls.isNotEmpty)
+                  Column(
+                    children: [
+                      CarouselSlider(
+                        items: imageUrls.map((imageUrl) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10.r),
+                            child: Image.file(
+                              File(imageUrl),
+                              width: double.infinity,
+                              height: 150.h,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          height: 250.h,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          viewportFraction: 1.0,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: imageUrls.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8.w,
+                            height: 8.h,
+                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _currentImageIndex == entry.key
+                                  ? Colors.blue
+                                  : Colors.grey.withOpacity(0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Image.asset(
+                      "assets/images/demandeLocationImage.png",
+                      width: double.infinity,
+                      height: 150.h,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 SizedBox(height: 10.h),
                 Text(
                   widget.title,
@@ -183,7 +277,7 @@ class _RentalItemCardHistoriqueState extends State<RentalItemCardHistorique> {
                               radius: 18.r,
                               backgroundImage: userProfileImage != null
                                   ? FileImage(File(userProfileImage!))
-                                  : AssetImage("assets/images/default_avatar.png") as ImageProvider,
+                                  : AssetImage("assets/images/user1.png") as ImageProvider,
                             ),
                             SizedBox(width: 8.w),
                             Expanded(

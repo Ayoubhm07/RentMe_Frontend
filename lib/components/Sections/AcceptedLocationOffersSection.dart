@@ -122,7 +122,8 @@ class _AcceptedLocationOffersSectionState extends State<AcceptedLocationOffersSe
                           Location demand = demandSnapshot.data!;
                           return AcceptedOfferCard(
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: demand.images,
+                            locationId: demand.id ?? 0,
                             title: demand.description,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             dateDemand: demand.timeUnit,

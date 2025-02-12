@@ -1,21 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:khedma/Services/UserService.dart';
+import 'package:khedma/Services/ProfileService.dart';
+import 'package:khedma/Services/MinIOService.dart';
+import 'package:khedma/entities/User.dart';
+import 'package:khedma/entities/ProfileDetails.dart';
 
-class Metier {
-  final String imagePath;
-  final String name;
-  final double rating;
-  final String location;
-  final String expertise;
-  final String professionalName;
-  bool verified;
-  bool isDisliked;
-
-  Metier(this.imagePath, this.name, this.rating, this.location, this.expertise,
-      this.professionalName, this.verified,
-      {this.isDisliked = false});
-}
+import '../../CheckProfile.dart';
 
 class BestOffers extends StatefulWidget {
   @override
@@ -23,49 +16,76 @@ class BestOffers extends StatefulWidget {
 }
 
 class _BestOffersState extends State<BestOffers> {
-  final List<Metier> metierList = [
-    Metier('assets/images/img_6.png', 'Design Graphique', 4.9, 'A distance',
-        'Expert', 'Nourhene Bakalti', true),
-    Metier('assets/images/menage.jpeg', 'Ménage', 4.9, 'Paris', 'Professionnel',
-        'Mark Marker', false),
-    Metier('assets/images/img_5.png', 'Plombier', 4.9, 'Paris', 'Professionnel',
-        'Mark Marker', false),
-    Metier('assets/images/img_11.png', 'Ménage', 4.9, 'Paris', 'Professionnel',
-        'Mark Marker', false),
-  ];
+  List<User> _topContributers = [];
+  UserService userService = UserService();
+  final ProfileService profileService = ProfileService();
+  final MinIOService minIOService = MinIOService();
+  Map<int, String?> _userImages = {}; // Pour stocker les images des utilisateurs
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTopContributers();
+  }
+
+  Future<void> _loadTopContributers() async {
+    try {
+      _topContributers = await userService.getTopFiveContributors();
+      print("Top contributeurs: $_topContributers");
+      setState(() {});
+    } catch (e) {
+      print("Erreur lors du chargement des top contributeurs: $e");
+    }
+  }
+
+  Future<void> _fetchUserProfileImage(int userId) async {
+    try {
+      ProfileDetails profDetail = await profileService.getProfileDetails(userId);
+      if (profDetail.profilePicture != null) {
+        String objectName = profDetail.profilePicture!.replaceFirst('images_', '');
+        String filePath = await minIOService.LoadFileFromServer('images', objectName);
+        setState(() {
+          _userImages[userId] = filePath;
+        });
+        print("Image chargée pour l'utilisateur $userId: ${_userImages[userId]}");
+      }
+    } catch (e) {
+      print('Failed to load user profile image: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Titre "Membres Distingués"
+        // Titre "Top Contributeurs"
         Padding(
           padding: EdgeInsets.only(left: 16.w, top: 16.h, bottom: 16.h),
           child: Text(
-            'Membres Distingués',
+            'Top Contributeurs',
             style: GoogleFonts.roboto(
-              fontSize: 20.sp,
+              fontSize: 24.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: Colors.blue.shade800,
               shadows: [
                 Shadow(
                   color: Colors.black26,
-                  blurRadius: 4,
+                  blurRadius: 6,
                   offset: Offset(2, 2),
                 ),
               ],
             ),
           ),
         ),
-        // Liste horizontale des membres
+        // Liste des top contributeurs
         Container(
-          height: 260.h,
+          height: 280.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: metierList.length,
+            itemCount: _topContributers.length,
             itemBuilder: (context, index) {
-              return _buildListItem(context, index);
+              return _buildContributorCard(context, index);
             },
           ),
         ),
@@ -73,157 +93,173 @@ class _BestOffersState extends State<BestOffers> {
     );
   }
 
-  Widget _buildListItem(BuildContext context, int index) {
-    Metier metier = metierList[index];
-    Color borderColor = metier.verified ? Colors.orange : Colors.green;
-    return Container(
-      width: 200.w,
-      height: 250.h,
-      margin: EdgeInsets.symmetric(horizontal: 8.w),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: borderColor, width: 3.0),
-          borderRadius: BorderRadius.all(Radius.circular(10.w)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(10.w)),
-          child: Stack(
-            children: [
-              Image.asset(
-                metier.imagePath,
-                fit: BoxFit.cover,
-                width: 200.w,
-                height: 250.h,
-              ),
-              Container(
-                width: 200.w,
-                height: 250.h,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.7),
-                    ],
+  // Méthode pour construire une carte de contributeur
+  Widget _buildContributorCard(BuildContext context, int index) {
+    User contributor = _topContributers[index];
+    if (_userImages[contributor.id] == null) {
+      _fetchUserProfileImage(contributor.id!);
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Navigation vers le profil de l'utilisateur
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckProfile(userId: contributor.id ?? 0),
+          ),
+        );
+      },
+      child: Container(
+        width: 200.w,
+        height: 280.h,
+        margin: EdgeInsets.symmetric(horizontal: 8.w),
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.w),
+            side: BorderSide(
+              color: contributor.note != null && contributor.note! >= 4.5
+                  ? Colors.orange
+                  : Colors.green,
+              width: 3.0,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15.w),
+            child: Stack(
+              children: [
+                // Image de fond (utiliser l'image de l'utilisateur si disponible)
+                _userImages[contributor.id] != null
+                    ? Image.file(
+                  File(_userImages[contributor.id]!),
+                  fit: BoxFit.cover,
+                  width: 200.w,
+                  height: 280.h,
+                )
+                    : Image.asset(
+                  'assets/images/profile_placeholder.png',
+                  fit: BoxFit.cover,
+                  width: 200.w,
+                  height: 280.h,
+                ),
+                // Dégradé pour améliorer la lisibilité du texte
+                Container(
+                  width: 200.w,
+                  height: 280.h,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.7),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: 8.h,
-                left: 12.w,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      metier.verified = !metier.verified;
-                    });
-                  },
+                // Icônes interactives en haut de la carte
+                Positioned(
+                  top: 12.h,
+                  left: 12.w,
                   child: CircleAvatar(
-                    backgroundColor: metier.verified ? Colors.orange : Colors.green,
+                    backgroundColor: contributor.note != null && contributor.note! >= 4.5
+                        ? Colors.orange
+                        : Colors.green,
                     radius: 16.sp,
                     child: Icon(
-                      metier.verified ? Icons.verified : Icons.check_circle_outline_outlined,
+                      contributor.note != null && contributor.note! >= 4.5
+                          ? Icons.verified
+                          : Icons.check_circle_outline,
                       color: Colors.white,
                       size: 20.sp,
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: 8.h,
-                right: 12.w,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      metier.isDisliked = !metier.isDisliked;
-                    });
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 16.sp,
-                    child: Icon(
-                      metier.isDisliked ? Icons.favorite_border : Icons.favorite,
-                      color: Colors.red,
-                      size: 20.sp,
+                // Note de l'utilisateur
+                Positioned(
+                  top: 12.h,
+                  right: 12.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(12.w),
                     ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 8.h,
-                left: 12.w,
-                right: 12.w,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      metier.name,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      metier.professionalName,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: metier.expertise == 'Expert' ? Colors.green : Colors.red,
-                        borderRadius: BorderRadius.circular(7.w),
-                      ),
-                      child: Text(
-                        metier.expertise,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.yellow, size: 16.sp),
-                            SizedBox(width: 2.w),
-                            Text(
-                              metier.rating.toString(),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, size: 16.sp, color: Colors.white),
-                            SizedBox(width: 2.w),
-                            Text(
-                              metier.location,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                        Icon(Icons.star, color: Colors.yellow, size: 16.sp),
+                        SizedBox(width: 4.w),
+                        Text(
+                          contributor.note?.toStringAsFixed(1) ?? '0.0',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 12.h,
+                  left: 12.w,
+                  right: 12.w,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Rôle du contributeur
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(8.w),
+                        ),
+                        child: Text(
+                          contributor.roles ?? 'Rôle non défini',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      // Nom de l'utilisateur
+                      Text(
+                        contributor.userName,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      // Email de l'utilisateur
+                      if (contributor.email != null)
+                        Text(
+                          contributor.email!,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.white,
+                          ),
+                        ),
+                      SizedBox(height: 4.h),
+                      if (contributor.numTel != null)
+                        Text(
+                          contributor.numTel!,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.white,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

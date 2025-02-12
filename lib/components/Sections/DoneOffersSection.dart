@@ -120,8 +120,9 @@ class _DoneOffersSectionState extends State<DoneOffersSection> {
                           Demand demand = demandSnapshot.data!;
 
                           return DoneOfferCard(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "" ,
-                            imageUrl: 'https://example.com/image1.png',
+                            images: 'https://example.com/image1.png',
                             title: demand.title,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: _formatDateTime(demand.addedDate),

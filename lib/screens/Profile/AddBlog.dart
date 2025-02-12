@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:khedma/Services/TravailService.dart';
+import 'package:khedma/entities/Travail.dart';
+import 'package:khedma/Services/MinIOService.dart';
+
+import '../../Services/SharedPrefService.dart';
+import '../../entities/User.dart';
 
 class AddBlog extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
@@ -16,9 +22,20 @@ class _AddBlogState extends State<AddBlog> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final List<File> _selectedImages = []; // Liste pour stocker les images sélectionnées
+  final List<File> _selectedImages = [];
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
+  final TravailService travailService = TravailService(); // Ajoutez TravailService
+  final MinIOService minIOService = MinIOService(); // Ajoutez MinIOService
+  bool isLoading = false; // Pour gérer l'état de chargement
+  final SharedPrefService sharedPrefService = SharedPrefService();
+  User? user;
+
+
+  Future<void> loadUser() async {
+    user = await sharedPrefService.getUser();
+    setState(() {});
+  }
 
   @override
   void initState() {
@@ -35,6 +52,7 @@ class _AddBlogState extends State<AddBlog> with SingleTickerProviderStateMixin {
       curve: Curves.easeInOut,
     ));
     _animationController.forward();
+    loadUser();
   }
 
   @override
@@ -45,16 +63,73 @@ class _AddBlogState extends State<AddBlog> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final newBlog = {
-        "title": _titleController.text,
-        "description": _descriptionController.text,
-        "date": "25 Oct 2023", // Date statique pour l'exemple
-        "images": _selectedImages, // Liste des images sélectionnées
-      };
-      widget.onSave(newBlog);
-      Navigator.pop(context);
+      setState(() {
+        isLoading = true; // Activer l'état de chargement
+      });
+
+      try {
+        // Créer un objet Travail
+        Travail newTravail = Travail(
+          description: _descriptionController.text,
+          titre: _titleController.text,
+          image: '', // Initialiser avec une chaîne vide
+          addedDate: DateTime.now(), // Date actuelle
+          userId: user!.id ?? 0,
+        );
+
+        Travail savedTravail = await travailService.addTravail(newTravail);
+        int travailId = savedTravail.id!;
+        List<String> imageUrls = [];
+        for (int i = 0; i < _selectedImages.length; i++) {
+          String imageUrl = await minIOService.saveTravailImagesToServer(
+            'images', // Nom du bucket
+            _selectedImages[i], // Fichier image
+            travailId, // ID du travail
+          );
+          imageUrls.add(imageUrl);
+        }
+
+        String updatedImages = imageUrls.join(',');
+        newTravail.image = updatedImages ;
+        print(updatedImages);
+        await travailService.updateTravailImages(travailId, updatedImages);
+        setState(() {
+          isLoading = false;
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Succès'),
+              content: Text('Travail ajouté avec succès !'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Fermer le dialogue
+                    Navigator.pop(context); // Fermer le formulaire
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        // Désactiver l'état de chargement en cas d'erreur
+        setState(() {
+          isLoading = false;
+        });
+
+        // Afficher un message d'erreur
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'ajout du travail : $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -227,7 +302,7 @@ class _AddBlogState extends State<AddBlog> with SingleTickerProviderStateMixin {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: isLoading ? null : _submitForm, // Désactiver le bouton pendant le chargement
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF0099D6),
                     padding: EdgeInsets.symmetric(vertical: 14),
@@ -235,7 +310,9 @@ class _AddBlogState extends State<AddBlog> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white) // Afficher un indicateur de chargement
+                      : Text(
                     "Ajouter",
                     style: GoogleFonts.roboto(
                       fontSize: 16,

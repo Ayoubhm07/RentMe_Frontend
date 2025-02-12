@@ -93,10 +93,11 @@ class OffreLocationService {
 
         if (receiver.fcmToken != null && receiver.fcmToken!.isNotEmpty) {
           NotificationRequest notificationRequest = NotificationRequest(
-              title: "Offre Acceptée",
-              body: "${user.userName} a accepté votre offre de location.",
+              title: "Offre Acceptee",
+              body: "${user.userName} a accepte votre offre de location.",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ,
+              receiverId: receiverId ,
+              senderId: user.id ?? 0,
               topic: 'offre de location');
           await notificationService.sendNotificationByToken(notificationRequest);
           print('Offre créée avec succès');
@@ -137,7 +138,8 @@ class OffreLocationService {
               title: "Offre Terminee",
               body: "Vous devez payer ${user.userName}.",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ?? 0,
+              receiverId: receiverId ?? 0,
+              senderId: user.id ?? 0,
               topic: 'offre de location');
           await notificationService.sendNotificationByToken(notificationRequest);
           print('Offre de location terminée avec succès');
@@ -155,7 +157,8 @@ class OffreLocationService {
   }
 
   Future<OffreLocation> rejectOffer(int id) async {
-    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
       final response = await http.patch(
         Uri.parse('$url/$id/reject'),
         headers: {
@@ -226,7 +229,8 @@ class OffreLocationService {
               title: "Nouvelle offre de location ajoutee",
               body: "Vous avez recu une offre de location de la part de ${user.userName}",
               token: receiver.fcmToken ?? "",
-              userId: receiverId ,
+              receiverId: receiverId ,
+              senderId: user.id ?? 0,
               topic: 'offre de location'
               );
           await notificationService.sendNotificationByToken(notificationRequest);

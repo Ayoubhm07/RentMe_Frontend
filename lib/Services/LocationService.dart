@@ -36,6 +36,55 @@ class LocationService {
     }
   }
 
+  Future<Location> updateLocationImages(int locationId, String images) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+
+      final response = await http.patch(
+        Uri.parse('$url/updateImages/$locationId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(images),
+      );
+
+      if (response.statusCode == 200) {
+        print('Images de la location mises à jour avec succès');
+        return Location.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Échec de la mise à jour des images : ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+  Future<Location> updateLocation(Location location) async {
+    String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
+    try {
+      final response = await http.put(
+        Uri.parse('$url/update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(location.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        print('Location mise à jour avec succès');
+        return Location.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Échec de la mise à jour de la Location: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erreur de connexion: $e');
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
   Future<Location> getLocationById(int id) async {
     String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');    try {
       final response = await http.get(

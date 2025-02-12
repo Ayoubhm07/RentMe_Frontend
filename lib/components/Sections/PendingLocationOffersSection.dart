@@ -36,14 +36,17 @@ class _PendingLocationOffersSectionState extends State<PendingLocationOffersSect
   final SharedPrefService sharedPrefService = SharedPrefService();
   final ProfileService profileService = ProfileService();
   final MinIOService minIOService = MinIOService();
-
   String? userImage;
+
 
   @override
   void initState() {
     super.initState();
     _fetchUserProfileImage();
   }
+
+
+
 
   Future<void> _fetchUserProfileImage() async {
     try {
@@ -129,8 +132,9 @@ class _PendingLocationOffersSectionState extends State<PendingLocationOffersSect
                         } else {
                           Location demand = demandSnapshot.data!;
                           return CardOffre(
+                            locationId: demand.id ?? 0,
                             userImage: userImage ?? "",
-                            imageUrl: 'https://example.com/image1.png',
+                            images: demand.images,
                             title: demand.description,
                             dateDebut: _formatDateTime(offre.acceptedAt),
                             addedDate: demand.timeUnit,
@@ -179,7 +183,6 @@ class _PendingLocationOffersSectionState extends State<PendingLocationOffersSect
                   );
                 },
               );
-
               await Future.delayed(Duration(seconds: 2));
               Navigator.of(context).pop(); // Fermer SuccessDialog
               Navigator.of(context).pop();

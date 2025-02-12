@@ -62,7 +62,7 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
       TextEditingController(); // for prix
   // set defeult for prix
 
-  String? _selectedTimeUnit = 'Heure'; // Default value for dropdown
+  String? _selectedTimeUnit = 'Heure';
   String images = '';
   late DemandeService demandeService;
   late LocationService locationService;
@@ -677,84 +677,106 @@ class _CustomSwitch2State extends State<CustomSwitch2> {
           child: isLoading
               ? CircularProgressIndicator()
               : ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    if (validateLocation()) {
-                      for (int i = 0; i < _selectedImages.length; i++) {
-                        String imageUrl = await minIOService.saveFileToServer(
-                            'images', _selectedImages[i]);
-                        images += imageUrl + ',';
-                      }
-                      print("images" + images);
-                      Location location = Location(
-                        description: _descriptionController2.text,
-                        category: _CategoryController.text,
-                        prix: double.parse(_prixcontroller.text),
-                        timeUnit: _selectedTimeUnit!,
-                        images: images,
-                        status: LocationStatus.DISPONIBLE,
-                        userId: currentUser.id!,
-                      );
-                      await (locationService.saveLocation(location));
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
 
-                      setState(() {
-                        isLoading = false;
-                      });
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SuccessDialog(
-                            message: 'Demande de location ajoutée correctement',
-                            logoPath: 'assets/images/logo.png',
-                            iconPath: 'assets/icons/check1.png',
-                          );
-                        },
-                      );
-                      Future.delayed(Duration(seconds: 2), () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      });
-                    } else {
-                      // show a snackbar
-                      ScaffoldMessenger.of(widget.context).showSnackBar(
-                        SnackBar(
-                          content: Text("Veuillez remplir tous les champs !"),
-                          backgroundColor: Colors.redAccent,
-                          behavior: SnackBarBehavior.fixed,
+              if (validateLocation()) {
+                // Créer ou mettre à jour l'objet Location
+                Location location = Location(
+                  description: _descriptionController2.text,
+                  category: _CategoryController.text,
+                  prix: double.parse(_prixcontroller.text),
+                  timeUnit: _selectedTimeUnit!,
+                  images: images,
+                  status: LocationStatus.DISPONIBLE,
+                  userId: currentUser.id!,
+                );
 
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(
-                            label: 'OK',
-                            textColor: Colors.white,
-                            onPressed: () {
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
-                            },
-                          ),
-                        ),
-                      );
-                    }
+                Location savedLocation;
+                if (location.id == null) {
+                  // Créer la location si l'ID n'est pas défini
+                  savedLocation = await locationService.saveLocation(location);
+                } else {
+                  // Mettre à jour la location existante
+                  savedLocation = await locationService.updateLocation(location);
+                }
+
+                int locationId = savedLocation.id!;
+
+                List<String> imageUrls = [];
+                for (int i = 0; i < _selectedImages.length; i++) {
+                  String imageUrl = await minIOService.saveLocationImagesToServer(
+                    'images',
+                    _selectedImages[i],
+                    locationId,
+                  );
+                  imageUrls.add(imageUrl);
+                }
+                String updatedImages = imageUrls.join(',');
+                location.images = updatedImages;
+                await locationService.updateLocationImages(locationId, updatedImages);
+                // location.images = updatedImages;
+                // print(updatedImages);
+                // print(location.images);
+                // await locationService.updateLocationImages(locationId, updatedImages);
+                setState(() {
+                  isLoading = false;
+                });
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SuccessDialog(
+                      message: 'Demande de location ajoutée correctement',
+                      logoPath: 'assets/images/logo.png',
+                      iconPath: 'assets/icons/check1.png',
+                    );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor, // Blue color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Radius
+                );
+
+                // Retourner à l'écran précédent après 2 secondes
+                Future.delayed(Duration(seconds: 2), () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                });
+              } else {
+                // Afficher un message d'erreur si les champs ne sont pas valides
+                ScaffoldMessenger.of(widget.context).showSnackBar(
+                  SnackBar(
+                    content: Text("Veuillez remplir tous les champs !"),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.fixed,
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'OK',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      },
                     ),
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
                   ),
-                  child: Text(
-                    'Terminer',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor, // Couleur bleue
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20), // Rayon
+              ),
+              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 50.w),
+            ),
+            child: Text(
+              'Terminer',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
+
       ],
     );
   }
