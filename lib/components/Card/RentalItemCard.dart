@@ -6,6 +6,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:khedma/Services/MinIOService.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:khedma/Services/SharedPrefService.dart';
+import '../../Services/ConversationAndMessageService.dart';
+import '../../Services/UserService.dart';
+import '../../entities/Conversation.dart';
+import '../../entities/User.dart';
+import '../../screens/ChatMessage.dart';
 import '../../screens/CheckProfile.dart';
 
 class RentalItemCardDisponible extends StatefulWidget {
@@ -51,13 +57,60 @@ class _RentalItemCardDisponibleState extends State<RentalItemCardDisponible> {
   String? userProfileImage;
   List<String> imageUrls = [];
   int _currentImageIndex = 0;
+  int? currentUserId;
+  SharedPrefService sharedPrefService = SharedPrefService();
 
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
     _fetchUserProfileImage();
     _loadLocationImages();
+    print(widget.userId);
   }
+
+  Future<void> getCurrentUser() async {
+    User user= await sharedPrefService.getUser();
+    currentUserId = user.id;
+  }
+
+  Future<void> _handleMessageClick(BuildContext context, {required int senderId, required int receiverId}) async {
+    try {
+      User currentUser = await UserService().findUserById(senderId);
+      User receiver = await UserService().findUserById(receiverId);
+
+      if (senderId == null || receiverId == null) {
+        throw Exception("senderId ou receiverId est null");
+      }
+
+      ConversationAndMessageService service = ConversationAndMessageService();
+      Conversation conversation = await service.createConversation(
+        senderId,
+        [receiverId],
+      );
+
+      int conversationId = conversation.id;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatMessagePage(
+            conversationId: conversationId,
+            receiver: receiver,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Erreur lors de la création de la conversation: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de la création de la conversation: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 
   Future<void> _fetchUserProfileImage() async {
     try {
@@ -306,7 +359,6 @@ class _RentalItemCardDisponibleState extends State<RentalItemCardDisponible> {
               _buildContactInfo(Icons.email, widget.userEmail),
               _buildContactInfo(Icons.location_on, widget.address),
               SizedBox(height: 20.h),
-              // Boutons d'action
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -314,7 +366,9 @@ class _RentalItemCardDisponibleState extends State<RentalItemCardDisponible> {
                     icon: Icons.message,
                     label: 'Contacter',
                     color: Colors.green,
-                    onPressed: widget.onContactPressed,
+                    onPressed: () async {
+                       await _handleMessageClick(context, senderId: currentUserId ?? 0, receiverId: widget.userId);
+                    },
                   ),
                   _buildActionButton(
                     icon: Icons.shopping_cart,

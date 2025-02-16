@@ -15,27 +15,41 @@ class TokenConverterScreen extends StatefulWidget {
 
 class _TokenConverterState extends State<TokenConverterScreen> {
   final TextEditingController _tokenController = TextEditingController();
-
   TransactionService transactionService = TransactionService();
+  bool _isLoading = false; // Pour gérer l'état de chargement
 
   Future<void> makeCashout() async {
+    setState(() {
+      _isLoading = true; // Activer l'état de chargement
+    });
+
     try {
       User user = await SharedPrefService().getUser();
       if (_tokenController.text.isNotEmpty) {
         int tokens = int.parse(_tokenController.text);
-        print("Myyyy TOKEEENNNNNS : $tokens");
-        print("MYYY USEEEEERRR  : $user");
-        await transactionService.workerPayout(user.id ?? 0, tokens);
+        print("Tokens: $tokens");
+        print("User: $user");
+        String result = await transactionService.workerPayout(user.id ?? 0, tokens);
+        print("Payout result: $result");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Payout successful: $result")),
+        );
       } else {
         throw Exception("Le champ de tokens est vide !");
       }
     } catch (e, s) {
-      print("Exception 1: $e");
+      print("Exception: $e");
       print("Stack trace: $s");
-
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur lors du paiement: ${e.toString()}")),
+      );
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => EchecTokenScreen(),
       ));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -120,7 +134,7 @@ class _TokenConverterState extends State<TokenConverterScreen> {
                           ),
                           SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: () => makeCashout(),
+                            onPressed: _isLoading ? null : () => makeCashout(),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(vertical: 15),
                               backgroundColor: Colors.blue,
@@ -128,7 +142,9 @@ class _TokenConverterState extends State<TokenConverterScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: Center(
+                            child: _isLoading
+                                ? CircularProgressIndicator(color: Colors.white)
+                                : Center(
                               child: Text(
                                 'Complétez votre retrait',
                                 style: TextStyle(color: Colors.white),

@@ -24,7 +24,7 @@ class RentalItemDetailPage extends StatelessWidget {
   final String ownerName;
   final String userEmail;
   final String phoneNumber;
-  final String userImage; // Added for owner's image
+  final String userImage;
   final String statut;
   final String description;
   const RentalItemDetailPage({

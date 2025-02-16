@@ -13,6 +13,7 @@ import '../../components/Card/SuccessNotificationCard.dart';
 import '../../entities/NotificationMesage.dart';
 import '../../entities/ProfileDetails.dart';
 import '../../entities/User.dart';
+import '../SideMenu.dart';
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -26,12 +27,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
   MinIOService minIOService = MinIOService();
   String? userImage;
   int _userId = 0;
+  bool _isSettingsDrawer = false;
+
 
   @override
   void initState() {
     super.initState();
     _initializeUser();
     _fetchUserProfileImage();
+  }
+
+  void _toggleDrawer(BuildContext context) {
+    setState(() {
+      _isSettingsDrawer = !_isSettingsDrawer;
+    });
+    Navigator.of(context).pop();
+    Scaffold.of(context).openEndDrawer();
   }
 
   Future<void> _fetchUserProfileImage() async {
@@ -119,6 +130,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: _isSettingsDrawer
+          ? Builder(
+        builder: (context) =>
+            SettingsDrawer(toggleDrawer: () => _toggleDrawer(context)),
+      )
+          : Builder(
+        builder: (context) =>
+            MyDrawer(toggleDrawer: () => _toggleDrawer(context)),
+      ),
       appBar: CustomAppBar(
         notificationIcon: Icon(Icons.notifications, color: Colors.white),
         title: 'Notifications',
@@ -137,7 +157,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
             } else if (snapshot.hasData) {
               return ListView(
                 children: snapshot.data!.map((notification) {
-                  // Display notifications based on their state
                   if (notification.state == NotificationState.unread) {
                     return UnreadNotificationTile(
                       senderId: notification.senderId ?? 0,

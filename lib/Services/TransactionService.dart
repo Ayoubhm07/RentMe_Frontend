@@ -11,7 +11,7 @@ class TransactionService {
     final url = Uri.parse('$_baseUrl/onboarding-link/$accountId');
     String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
-      final response = await http.get(url, headers: {
+      final response = await http.get(url, headers:{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       });
@@ -63,23 +63,27 @@ class TransactionService {
 
   }
 
+
   Future<String> workerPayout(int userId, int tokens) async {
     final url = Uri.parse('$_baseUrl/worker-payout/$userId/$tokens');
     String accessToken = await sharedPrefService.readStringFromPrefs('accessToken');
     try {
-      final response = await http.post(url,
+      final response = await http.post(
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
       );
+
       if (response.statusCode == 200) {
-        return "Payout successful. Payout ID: ${json.decode(response.body)['id']}";
+        return response.body;
       } else {
-        throw Exception('Failed to payout worker: ${response.reasonPhrase}');
+        throw Exception('Failed to process payout: ${response.reasonPhrase}');
       }
     } catch (e) {
-      throw Exception('Error during payout: $e');
+      throw Exception('Error processing payout: $e');
     }
   }
+
 }
